@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { addDoc, collection, doc, DocumentData, getDoc, getDocs, getFirestore, onSnapshot, setDoc } from "firebase/firestore";
+import { IUser } from "./types";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -47,3 +48,27 @@ export const subscribeUser = async (username: string, callback: (user: any) => v
 
     return unsub;
 }
+
+export const authenticateUser = async (username: string) => {
+    const userRef = doc(firestore, "users", username);
+    const userSnap = await getDoc(userRef);
+
+    // If an account doesn't exist, we create it.
+    if (!userSnap.exists()) {
+
+        const data: IUser = {
+            username: username,
+            balance: 1000,    
+        }
+
+        try {
+            await setDoc(doc(firestore, "users", username), data);
+            return Promise.resolve(data);
+        } catch (err) {
+            return Promise.reject(err);
+        }
+        
+    } else {
+        return Promise.resolve(userSnap.data());
+    }
+};
