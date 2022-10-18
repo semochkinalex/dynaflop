@@ -92,3 +92,18 @@ export const changeBalance = async (username: string, amount: number) => {
         return Promise.resolve(userSnap.data());
     }
 }
+
+export const fetchEvents = async () => {
+    try {
+        const events: any = [];
+        const querySnapshot = await getDocs(collection(firestore, "orders"));
+
+        querySnapshot.forEach((doc) => {
+          events.push(doc.data());
+        });
+
+        return Promise.resolve(events);
+    } catch (err) {
+        return Promise.reject();
+    }
+}

@@ -1,0 +1,7 @@
+.container {
+    background-color: #BAE8E8;
+    padding: 20px;
+    border-radius: 20px; 
+    width: fit-content;
+    list-style-type: none;  
+}
