@@ -1,5 +1,5 @@
-import { FC, useState } from 'react';
-import { authenticateUser } from '../../utils/firebase';
+import { FC, useContext, useState } from 'react';
+import { authenticateUser, subscribeUser } from '../../utils/firebase';
 import styles from './authenticate.module.css';
 
 import { UserContext } from '../../context/user-context';
@@ -7,16 +7,13 @@ import { UserContext } from '../../context/user-context';
 const Authenticate: FC = () => {
 
     const [username, setUsername] = useState<string>('');
-    // const [user, ]
+    
+    const [user, setUser] = useContext(UserContext);
 
     const onAuthenticate = (e: any) => {
         e.preventDefault();
-        authenticateUser(username)
-        .then((data) => {
-            console.log(data);
-        })
-        .catch((err) => {
-            console.log(err);
+        subscribeUser(username, (data) => {
+            setUser(data)
         })
     }
 

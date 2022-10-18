@@ -1,9 +1,13 @@
 import type { NextPage } from 'next'
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import Authenticate from '../components/authenticate/authenticate'
+import Profile from '../components/profile/profile'
+import { UserContext } from '../context/user-context'
 import { signupUser, subscribeUser } from '../utils/firebase'
 
 const Home: NextPage = () => {
+
+  const [user, setUser] = useContext(UserContext);
 
   useEffect(() => {
     // const unsub = subscribeUser('fennyflop', console.log)
@@ -13,7 +17,12 @@ const Home: NextPage = () => {
 
   return (
     <main>
-      <Authenticate />
+      {
+        user ?
+        <Profile />
+        :
+        <Authenticate />
+      }
     </main>
   )
 }

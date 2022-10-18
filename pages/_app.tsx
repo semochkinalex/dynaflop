@@ -10,6 +10,7 @@ import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
+  const [unsubscribe, setUnsubscribe] = useState();
   const router = useRouter();
   const state = useState<null | IUser>(null);
 
@@ -25,10 +26,12 @@ function MyApp({ Component, pageProps }: AppProps) {
         setUser(user);
       })
 
-    } else {
-      router.push("/auth")
     }
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem("username", user?.username || '')
+  }, [user])
 
   return (
     <UserContext.Provider value={state}>

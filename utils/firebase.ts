@@ -42,11 +42,15 @@ export const signupUser = async (username: string, balance: number) => {
 }
 
 export const subscribeUser = async (username: string, callback: (user: any) => void) => {
-    const unsub = onSnapshot(doc(firestore, "users", username), (user) => {
-        callback(user.data());
-    });
+    try {
+        const unsub = onSnapshot(doc(firestore, "users", username), (user) => {
+            callback(user.data());
+        });
+        return Promise.resolve(unsub);
+    } catch (err) {
+        return Promise.reject(err);
+    }
 
-    return unsub;
 }
 
 export const authenticateUser = async (username: string) => {
@@ -72,3 +76,19 @@ export const authenticateUser = async (username: string) => {
         return Promise.resolve(userSnap.data());
     }
 };
+
+export const changeBalance = async (username: string, amount: number) => {
+    const userRef = doc(firestore, "users", username);
+    const userSnap = await getDoc(userRef);
+
+    // If an account doesn't exist, we create it.
+    if (userSnap.exists()) {
+        const data = userSnap.data();
+        
+        await setDoc(doc(firestore, "users", username), {...data, balance: data.balance + amount});
+        return Promise.resolve();
+        
+    } else {
+        return Promise.resolve(userSnap.data());
+    }
+}
