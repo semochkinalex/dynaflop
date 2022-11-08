@@ -1,8 +1,10 @@
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, useContext, useState } from 'react';
+import { UserContext } from '../../context/user-context';
 import styles from './set-order.module.css';
 
-const SetOrder = (minPrice: number, maxPrice: number, onSubmit: (a: number, b:number) => void) => {
+const SetOrder = ({minPrice, maxPrice, onSubmit}) => {
     const [data, setData] = useState({})
+    const [userData] = useContext(UserContext);
 
     const updateData = e => {
         setData({
@@ -13,13 +15,17 @@ const SetOrder = (minPrice: number, maxPrice: number, onSubmit: (a: number, b:nu
 
     const handleSubmit = (evt) => {
         evt.preventDefault();
-        onSubmit(data.price, data.quantity);
+        if (data.price > userData?.balance) {
+            onSubmit(data.price);
+        } else {
+            console.log("Insufficient balance")
+        }
     }
     
     return (
         <form className={styles.form} onSubmit={handleSubmit}>
             <input className={styles.input} onChange={updateData} name="price" type="number" min={minPrice} max={maxPrice} placeholder="Price" />
-            <input className={styles.input} onChange={updateData} name="quantity" type="number" min={minPrice} max={maxPrice} placeholder="Quantity" />
+            {/* <input className={styles.input} onChange={updateData} name="quantity" type="number" placeholder="Quantity" /> */}
             <button type="submit" className={styles.submit}>Set limit order</button>
         </form>
     );

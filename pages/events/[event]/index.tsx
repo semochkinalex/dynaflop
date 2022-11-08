@@ -1,12 +1,14 @@
 // import Authenticate from '../../components/authenticate/authenticate';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import SetOrder from '../../../components/set-order/set-order';
-import { subscribeEvent } from '../../../utils/firebase';
+import { UserContext } from '../../../context/user-context';
+import { buyTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
 
 const Auth = () => {
     const router = useRouter();
+    const [userData] = useContext(UserContext);
 
     const [eventData, setEventData] = useState();
 
@@ -15,10 +17,13 @@ const Auth = () => {
     useEffect(() => {
         if (!event) return;
         subscribeEvent(event, setEventData);
-    }, []);
+    }, [event]);
 
-    const handleSetOrder = (price, quantity) => {
-        console.log(price, quantity)
+    const buy = () => {
+        buyTicket(event, userData)
+        .catch((err) => {
+            console.log(err);
+        })
     }
 
 
@@ -27,6 +32,7 @@ const Auth = () => {
             <p className={styles.name}>Event: {event}</p>
             
             <p className={styles.name}>Quantity: {eventData?.quantity}</p>
+            <p>Current price: {eventData?.currentPrice}</p>
             <ul className={styles.buy}>
                 {
                     eventData && eventData?.buy?.map((order, i) => {
@@ -55,7 +61,10 @@ const Auth = () => {
                     })
                 }
             </ul>
-            <SetOrder minPrice={eventData?.minPrice} maxPrice={eventData?.maxPrice} handleSetOrder={handleSetOrder} />
+            <button type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+            
+            <button type="submit" onClick={buy}>Sell ticket for {eventData?.currentPrice - 10}</button>
+            {/* <SetOrder minPrice={eventData?.minPrice} maxPrice={eventData?.maxPrice} onSubmit={handleSetOrder} /> */}
         </main>
     )
 }

@@ -120,3 +120,26 @@ export const fetchEvents = async () => {
         return Promise.reject();
     }
 }
+
+export const buyTicket = async (event, userData) => {
+    try {
+        if (userData.balance < event.price) return Promise.reject("Insufficient balance");
+        const eventRef = doc(firestore, "orders", event);
+        const eventSnap = await getDoc(eventRef);
+
+        const data = eventSnap.data();
+        // change price
+        // MAKE SURE U CAN HAVE MULTIPLE TICKETS  PER ACCOUNT
+        await setDoc(doc(firestore, "orders", event), {...data, currentPrice: data.currentPrice + data.slippage, attendees: {...data.attendees, [userData.username]: 1}});
+        return Promise.resolve();
+    } catch (err) {
+        return Promise.reject(err);
+    }
+}
+
+// 1. check whether there are any orders which equal or higher the current price 
+// 2. if there are said orders, fullfill them until there are no viable left
+
+// 3. check whether user's order price is lower than set order
+// 4. if there is lower or equal, than it buys everything for the lowest availabe price
+// 5. if the price rises more than the user can afford, the set order stays but doesnt 
