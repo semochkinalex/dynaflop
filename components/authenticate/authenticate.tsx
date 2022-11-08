@@ -12,8 +12,15 @@ const Authenticate: FC = () => {
 
     const onAuthenticate = (e: any) => {
         e.preventDefault();
-        subscribeUser(username, (data) => {
-            setUser(data)
+        authenticateUser(username)
+        .then(() => {
+            subscribeUser(username, (data) => {
+                setUser(data)
+            })
+        })
+        .catch((err) => {
+            console.log('fail auth')
+            console.log(err);
         })
     }
 
@@ -24,7 +31,7 @@ const Authenticate: FC = () => {
                 <label className={styles.label} htmlFor="username">Username:</label>
                 <input className={styles.input} id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </fieldset>
-            <button className={styles.submit}>Submit</button>
+            <button className={styles.submit} type="submit">Submit</button>
         </form>
     );
 }

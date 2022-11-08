@@ -53,6 +53,18 @@ export const subscribeUser = async (username: string, callback: (user: any) => v
 
 }
 
+export const subscribeEvent = async (event: string, callback: (fetchedEvent: any) => void) => {
+    try {
+        const unsub = onSnapshot(doc(firestore, "orders", event), (fetchedEvent) => {
+            callback(fetchedEvent.data());
+        });
+        return Promise.resolve(unsub);
+    } catch (err) {
+        return Promise.reject(err);
+    }
+
+}
+
 export const authenticateUser = async (username: string) => {
     const userRef = doc(firestore, "users", username);
     const userSnap = await getDoc(userRef);
@@ -69,6 +81,7 @@ export const authenticateUser = async (username: string) => {
             await setDoc(doc(firestore, "users", username), data);
             return Promise.resolve(data);
         } catch (err) {
+            console.log(err);
             return Promise.reject(err);
         }
         

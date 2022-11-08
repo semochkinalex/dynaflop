@@ -30,7 +30,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("username", user?.username || '')
+    localStorage.setItem("username", user?.username || '');
+    console.log(user?.username)
   }, [user])
 
   return (
