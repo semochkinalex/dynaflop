@@ -6,7 +6,7 @@ import { UserContext } from '../../../context/user-context';
 import { buyTicket, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
 
-const Auth = () => {
+const Event = () => {
     const router = useRouter();
     const [userData] = useContext(UserContext);
 
@@ -76,4 +76,4 @@ const Auth = () => {
     )
 }
 
-export default Auth;
+export default Event;

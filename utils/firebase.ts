@@ -121,39 +121,27 @@ export const fetchEvents = async () => {
     }
 }
 
-// export const addTicket = async (eventData, userData) => {
-//     const userRef = doc(firestore, "users", userData.username);
-//     const userSnap = await getDoc(userRef);
-
-//     const userData = userSnap.doc();
-
-//     await setDoc(doc(firestore, "users", userData.username), {
-//         ...userData,
-//         balance: eventData.currentPrice,
-//         tickets: {
-//             ...userData.tickets,
-//             [eventData.name]: !userData.tickets[eventData.name] ? 1 : userData.tickets + 1,
-//         }
-//     });
-// }
-
-export const buyTicket = async (eventName, userData: any) => {
+export const buyTicket = async (eventName: string, userData: any) => {
     try {
         const eventRef = doc(firestore, "orders", eventName);
         const eventSnap = await getDoc(eventRef);
 
         const eventData = eventSnap.data();
 
+        if (!eventData) return Promise.reject("Failed to fetch event");
+
+        if (eventData?.availabe <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
 
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: eventData.currentPrice + eventData.slippage, attendees: {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 0}});
+        const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: eventData.currentPrice + eventData.slippage, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
             balance: userData.balance - eventData.currentPrice,
             tickets: {
                 ...userData.tickets,
-                [eventName]: (userData?.tickets ? userData?.tickets[eventName] ? true : false : false) ? userData?.tickets[eventName] + 1 : 1,
+                [eventName]: ticketCount,
             }
         });
 
@@ -163,7 +151,7 @@ export const buyTicket = async (eventName, userData: any) => {
     }
 }
 
-export const sellTicket = async (eventName, userData) => {
+export const sellTicket = async (eventName: string, userData: IUser) => {
     try {
         // if (!(userData.username in event.attendees)) return Promise.reject("User doesn't have available tickets");
 
@@ -172,18 +160,41 @@ export const sellTicket = async (eventName, userData) => {
 
         const eventData = eventSnap.data();
 
+        if (!eventData) return Promise.reject("Failed to fetch event data");
+        if (!userData) return Promise.reject("Invalid user account");
+
         if (!(userData.username in eventData.attendees) || eventData.attendees[userData.username] <= 0) return Promise.reject("User has no available tickets to sell");
-        // change price
-        // MAKE SURE U CAN HAVE MULTIPLE TICKETS  PER ACCOUNT
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: eventData.currentPrice - eventData.slippage, attendees: {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] - 1}});
+        
+        let updatedAttendees;
+
+        if (eventData['attendees'][userData.username] - 1 === 0) {
+            let {[userData.username]: deletedAttendee, ...leftAttendees} = eventData?.attendees;
+            updatedAttendees = leftAttendees;
+        } else {
+            updatedAttendees = {
+                ...eventData?.attendees,
+                [userData.username]: eventData?.attendees[userData.username] - 1,
+            };
+        }
+        // {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] - 1}
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: eventData.currentPrice - eventData.slippage, attendees: updatedAttendees});
+        
+        let updatedUserTickets;
+
+        if (userData?.tickets[eventName] - 1) {
+            updatedUserTickets = {
+                ...userData?.tickets,
+                [eventName]: userData?.tickets[eventName] - 1
+            };
+        } else {
+            let {[eventName]: deletedEvent, ...leftUserTickets} = userData?.tickets;
+            updatedUserTickets = leftUserTickets;
+        }
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
             balance: userData.balance + eventData.currentPrice - eventData.slippage,
-            tickets: {
-                ...userData.tickets,
-                [eventName]: userData?.tickets[eventName] - 1,
-            }
+            tickets: updatedUserTickets
         });
 
         return Promise.resolve();
@@ -192,9 +203,23 @@ export const sellTicket = async (eventName, userData) => {
     }
 }
 
-// 1. check whether there are any orders which equal or higher the current price 
-// 2. if there are said orders, fullfill them until there are no viable left
+export const createEvent = async (name: any, host: any, start: any, min: any, max: any, quantity: any, slippage: any) => {
+    try {
+        await setDoc(doc(firestore, "orders", name), {
+            name,
+            startingPrice: +start,
+            currentPrice: +start,
+            minPrice: +min,
+            maxPrice: +max,
+            available: +quantity,
+            quantity: +quantity,
+            slippage: +slippage,
+            attendees: {},
+            host,
+        });
 
-// 3. check whether user's order price is lower than set order
-// 4. if there is lower or equal, than it buys everything for the lowest availabe price
-// 5. if the price rises more than the user can afford, the set order stays but doesnt 
+        return Promise.resolve();
+    } catch (err) {
+        return Promise.reject(err);
+    }
+}
