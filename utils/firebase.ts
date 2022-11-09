@@ -121,16 +121,71 @@ export const fetchEvents = async () => {
     }
 }
 
-export const buyTicket = async (event, userData) => {
+// export const addTicket = async (eventData, userData) => {
+//     const userRef = doc(firestore, "users", userData.username);
+//     const userSnap = await getDoc(userRef);
+
+//     const userData = userSnap.doc();
+
+//     await setDoc(doc(firestore, "users", userData.username), {
+//         ...userData,
+//         balance: eventData.currentPrice,
+//         tickets: {
+//             ...userData.tickets,
+//             [eventData.name]: !userData.tickets[eventData.name] ? 1 : userData.tickets + 1,
+//         }
+//     });
+// }
+
+export const buyTicket = async (eventName, userData: any) => {
     try {
-        if (userData.balance < event.price) return Promise.reject("Insufficient balance");
-        const eventRef = doc(firestore, "orders", event);
+        const eventRef = doc(firestore, "orders", eventName);
         const eventSnap = await getDoc(eventRef);
 
-        const data = eventSnap.data();
+        const eventData = eventSnap.data();
+
+        if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
+
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: eventData.currentPrice + eventData.slippage, attendees: {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 0}});
+
+        await setDoc(doc(firestore, "users", userData.username), {
+            ...userData,
+            balance: userData.balance - eventData.currentPrice,
+            tickets: {
+                ...userData.tickets,
+                [eventName]: (userData?.tickets ? userData?.tickets[eventName] ? true : false : false) ? userData?.tickets[eventName] + 1 : 1,
+            }
+        });
+
+        return Promise.resolve();
+    } catch (err) {
+        return Promise.reject(err);
+    }
+}
+
+export const sellTicket = async (eventName, userData) => {
+    try {
+        // if (!(userData.username in event.attendees)) return Promise.reject("User doesn't have available tickets");
+
+        const eventRef = doc(firestore, "orders", eventName);
+        const eventSnap = await getDoc(eventRef);
+
+        const eventData = eventSnap.data();
+
+        if (!(userData.username in eventData.attendees) || eventData.attendees[userData.username] <= 0) return Promise.reject("User has no available tickets to sell");
         // change price
         // MAKE SURE U CAN HAVE MULTIPLE TICKETS  PER ACCOUNT
-        await setDoc(doc(firestore, "orders", event), {...data, currentPrice: data.currentPrice + data.slippage, attendees: {...data.attendees, [userData.username]: 1}});
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: eventData.currentPrice - eventData.slippage, attendees: {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] - 1}});
+
+        await setDoc(doc(firestore, "users", userData.username), {
+            ...userData,
+            balance: userData.balance + eventData.currentPrice - eventData.slippage,
+            tickets: {
+                ...userData.tickets,
+                [eventName]: userData?.tickets[eventName] - 1,
+            }
+        });
+
         return Promise.resolve();
     } catch (err) {
         return Promise.reject(err);

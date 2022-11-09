@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import SetOrder from '../../../components/set-order/set-order';
 import { UserContext } from '../../../context/user-context';
-import { buyTicket, subscribeEvent } from '../../../utils/firebase';
+import { buyTicket, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
 
 const Auth = () => {
@@ -26,12 +26,19 @@ const Auth = () => {
         })
     }
 
+    const sell = () => {
+        sellTicket(event, userData)
+        .catch((err) => {
+            console.log(err);
+        })
+    }
+
 
     return (
         <main>
             <p className={styles.name}>Event: {event}</p>
             
-            <p className={styles.name}>Quantity: {eventData?.quantity}</p>
+            <p className={styles.name}>Available: {eventData?.available}</p>
             <p>Current price: {eventData?.currentPrice}</p>
             <ul className={styles.buy}>
                 {
@@ -63,7 +70,7 @@ const Auth = () => {
             </ul>
             <button type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
             
-            <button type="submit" onClick={buy}>Sell ticket for {eventData?.currentPrice - 10}</button>
+            <button type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
             {/* <SetOrder minPrice={eventData?.minPrice} maxPrice={eventData?.maxPrice} onSubmit={handleSetOrder} /> */}
         </main>
     )
