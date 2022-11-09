@@ -133,12 +133,13 @@ export const buyTicket = async (eventName: string, userData: any) => {
         if (eventData?.availabe <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
 
+        const buyPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: eventData.currentPrice + eventData.slippage, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: buyPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
-            balance: userData.balance - eventData.currentPrice,
+            balance: userData.balance - buyPrice,
             tickets: {
                 ...userData.tickets,
                 [eventName]: ticketCount,
@@ -164,6 +165,7 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
         if (!userData) return Promise.reject("Invalid user account");
 
         if (!(userData.username in eventData.attendees) || eventData.attendees[userData.username] <= 0) return Promise.reject("User has no available tickets to sell");
+        if (!userData?.tickets) return Promise.reject("User account format isn't supported. Probably was changed manually through firebase");
         
         let updatedAttendees;
 
@@ -176,24 +178,28 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
                 [userData.username]: eventData?.attendees[userData.username] - 1,
             };
         }
-        // {...eventData.attendees, [userData.username]: eventData['attendees'][userData.username] - 1}
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: eventData.currentPrice - eventData.slippage, attendees: updatedAttendees});
+        
+        const newPrice = eventData.currentPrice - eventData.slippage < eventData.minPrice ? eventData.minPrice : eventData.currentPrice - eventData.slippage;
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: newPrice, attendees: updatedAttendees});
         
         let updatedUserTickets;
 
+        // @ts-ignore
         if (userData?.tickets[eventName] - 1) {
             updatedUserTickets = {
                 ...userData?.tickets,
+                // @ts-ignore
                 [eventName]: userData?.tickets[eventName] - 1
             };
         } else {
+            // @ts-ignore
             let {[eventName]: deletedEvent, ...leftUserTickets} = userData?.tickets;
             updatedUserTickets = leftUserTickets;
         }
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
-            balance: userData.balance + eventData.currentPrice - eventData.slippage,
+            balance: userData.balance + newPrice,
             tickets: updatedUserTickets
         });
 
