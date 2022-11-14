@@ -2,6 +2,8 @@ import type { AppProps } from 'next/app';
 
 import '../global.css';
 
+import styles from './app.module.css';
+
 import { UserContext } from '../context/user-context';
 import { useEffect, useState } from 'react';
 import { subscribeUser } from '../utils/firebase';
@@ -31,11 +33,22 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     localStorage.setItem("username", user?.username || '');
-    console.log(user?.username)
-  }, [user])
+  }, [user]);
+
+  
 
   return (
     <UserContext.Provider value={state}>
+      <header className={styles.header}>
+        <div className={styles.profile}>
+          <img className={styles.avatar} alt="Avatar" src="https://www.pngarts.com/files/6/User-Avatar-in-Suit-PNG.png" />
+          <p className={styles.username}>{user?.username} - <span className={styles.balance}>{user?.balance}₽</span></p>
+          <button className={styles.button}>Add Balance</button>
+        </div>
+        {/* <div className={styles.balance}>
+        </div> */}
+        <img className={styles.logout} alt="Logout" src="https://cdn-icons-png.flaticon.com/512/126/126467.png" />
+      </header>
       <Component {...pageProps} />
     </UserContext.Provider>
   );

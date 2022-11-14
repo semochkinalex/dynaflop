@@ -129,9 +129,16 @@ export const buyTicket = async (eventName: string, userData: any) => {
         const eventData = eventSnap.data();
 
         if (!eventData) return Promise.reject("Failed to fetch event");
-
+        
         if (eventData?.availabe <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
+        
+        const hostRef = doc(firestore, "users", eventData?.host);
+        const hostSnap = await getDoc(hostRef);
+
+        const hostData = hostSnap.data();
+
+        if (!hostData) return Promise.reject("Invalid host.");
 
         const buyPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
@@ -145,6 +152,17 @@ export const buyTicket = async (eventName: string, userData: any) => {
                 [eventName]: ticketCount,
             }
         });
+
+        // pay the host
+        await setDoc(doc(firestore, "users", hostData.username), {
+            ...hostData,
+            balance: hostData?.balance + buyPrice,
+        })
+
+        // await setDoc(doc(firestore, "users", eventData?.host), {
+        //     ...eventData?.host,
+        //     balance: eventData?.host.ba
+        // })
 
         return Promise.resolve();
     } catch (err) {
@@ -167,6 +185,13 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
         if (!(userData.username in eventData.attendees) || eventData.attendees[userData.username] <= 0) return Promise.reject("User has no available tickets to sell");
         if (!userData?.tickets) return Promise.reject("User account format isn't supported. Probably was changed manually through firebase");
         
+        const hostRef = doc(firestore, "users", eventData?.host);
+        const hostSnap = await getDoc(hostRef);
+
+        const hostData = hostSnap.data();
+
+        if (!hostData) return Promise.reject("Invalid host."); 
+       
         let updatedAttendees;
 
         if (eventData['attendees'][userData.username] - 1 === 0) {
@@ -202,6 +227,12 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
             balance: userData.balance + newPrice,
             tickets: updatedUserTickets
         });
+
+        // get money from host
+        await setDoc(doc(firestore, "users", hostData.username), {
+            ...hostData,
+            balance: hostData?.balance - newPrice,
+        })
 
         return Promise.resolve();
     } catch (err) {
