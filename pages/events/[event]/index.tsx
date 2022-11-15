@@ -12,6 +12,8 @@ const Event = () => {
 
     const [eventData, setEventData] = useState();
 
+    console.log(userData?.tickets)
+
     const {event} = router.query;
 
     useEffect(() => {
@@ -33,44 +35,39 @@ const Event = () => {
         })
     }
 
-
+    // console.log(((eventData?.currentPrice - eventData?.minPrice) / (eventData.maxPrice - eventData?.minPrice)) * 100)
     return (
-        <main>
-            <p className={styles.name}>Event: {event}</p>
+        <main className={styles.main}>
+            <p className={styles.name}>{event}</p>
+
+            <div className={styles.tags}>
+                <p className={styles.tag}>{eventData?.minPrice} ₽</p>
+                
+                <p className={styles.tag}>{eventData?.maxPrice} ₽</p>
+            </div>
             
-            <p className={styles.name}>Available: {eventData?.available}</p>
-            <p>Current price: {eventData?.currentPrice}</p>
-            <ul className={styles.buy}>
-                {
-                    eventData && eventData?.buy?.map((order, i) => {
-                        return (
-                            <li className={styles.order}>
-                                <p>Type: BUY</p>
-                                <p>User: {order.username}</p>
-                                <p>Quantity: {order.quantity}</p>
-                                <p>Price: {order.price}</p>
-                                <p>Volume: {order.price * order.quantity}</p> 
-                            </li>
-                        );
-                    })
-                }
-                {
-                    eventData && eventData?.sell?.map((order, i) => {
-                        return (
-                            <li className={`${styles.order} ${styles.sell}`}>
-                                <p>Type: SELL</p>
-                                <p>User: {order.username}</p>
-                                <p>Quantity: {order.quantity}</p>
-                                <p>Price: {order.price}</p>
-                                <p>Volume: {order.price * order.quantity}</p> 
-                            </li>
-                        );
-                    })
-                }
-            </ul>
-            <button type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
-            
-            <button type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+            <div className={styles.bar}><div className={styles.progress} style={{
+                width: `${((eventData?.currentPrice - eventData?.minPrice) / (eventData?.maxPrice - eventData?.minPrice)) * 100}%`
+            }}></div></div>
+
+            <div className={styles.tags}>
+                <p className={styles.tag}>Min. price</p>
+                
+                <p className={styles.tag}>Max. price</p>
+            </div>
+
+            <div className={styles.buttons}>
+                <button disabled={userData?.balance < eventData?.currentPrice} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+
+                <button disabled={userData && userData?.tickets && !userData?.tickets[eventData?.name]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+            </div>
+
+            {
+                userData && userData?.tickets && userData?.tickets[eventData?.name] ?
+                <p className={styles.hint}>You have {userData?.tickets[eventData?.name]} ticket (s)</p>
+                :
+                ''
+            }
             {/* <SetOrder minPrice={eventData?.minPrice} maxPrice={eventData?.maxPrice} onSubmit={handleSetOrder} /> */}
         </main>
     )

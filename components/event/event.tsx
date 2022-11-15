@@ -12,7 +12,7 @@ const Event: FC<IEvent> = ({name, currentPrice}) => {
         <li className={styles.event}>
             <p className={`${styles.name} ${styles.text}`}>{name}</p>
             
-            <p className={`${styles.text} ${styles.price}`}>{currentPrice} ₽</p>
+            <p className={`${styles.text} ${styles.price}`}>Price: {currentPrice} ₽</p>
             
             <Link href={`/events/${name}`}><button className={styles.visit}>Visit</button></Link>
         </li>

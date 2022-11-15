@@ -1,10 +1,71 @@
-.order {
+.main {
+    padding: 50px 0 0;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-transform: capitalize;
+}
+
+.name {
+    text-align: center;
+    font-size: 50px;
+    font-weight: bold;
+    text-decoration: underline;
+    margin-bottom: 30px;
+}
+
+.bar {
+    width: 80%;
+    height: 12px;
+    background-color: #afceff;
+    max-width: 300px;
+    border-radius: 2px;
+}
+
+.progress {
+    height: 100%;
+    width: 30%;
+    background-color: #3a86ff;
+    border-radius: 2px;
+}
+
+.tags {
+    width: 80%;
+    max-width: 300px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 90%;
+    margin-top: 20px;
+    max-width: 300px;
+}
+
+.button {
     padding: 10px;
-    background-color: green;
+    outline: none;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.button:hover {
+    cursor: pointer;
+}
+
+.buy {
+    background-color: #00FF7F;
 }
 
 .sell {
-    background-color: crimson;
+    background-color: #FF0000;
+}
+
+.hint {
+    margin: 20px 0 0;
+    font-size: 15px;
 }

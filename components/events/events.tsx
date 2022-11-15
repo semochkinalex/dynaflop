@@ -20,15 +20,12 @@ const Events = () => {
 
     return (
         <ul className={styles.container}>
+            <h2 className={styles.title}>Events</h2>
             {
                 events.map((el, i) => {
                     console.log(el)
                     return (
                         <Event {...el} />
-                        // <li className={styles.event}>
-                        //     <p className={styles.name}>{el.name}</p>
-                        //     <Link href={`/events/${el.name}`}><button>Visit event</button></Link>
-                        // </li>
                     )
                 })
             }

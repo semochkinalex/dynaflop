@@ -20,10 +20,8 @@
 }
 
 .price {
-    justify-content: flex-end;
-    text-align: right;
+    justify-content: flex-start;
     box-sizing: border-box;
-    padding: 0 20% 0 0;
 }
 
 .visit {
@@ -35,4 +33,7 @@
     border-radius: 5px;
     padding: 5px 0;
     /* padding: 5px; */
+}
+.visit:hover {
+    cursor: pointer;
 }

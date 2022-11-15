@@ -8,4 +8,5 @@
     flex-direction: column;
     gap: 10px;
     width: 90%;  
+    max-width: 450px;
 }
