@@ -1,7 +1,7 @@
 import { FC, useContext, useState } from 'react';
 import { authenticateUser, subscribeUser } from '../../utils/firebase';
 import styles from './authenticate.module.css';
-
+``
 import { UserContext } from '../../context/user-context';
 
 const Authenticate: FC = () => {

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { fetchEvents } from '../../utils/firebase';
+import Event from '../event/event';
 import styles from './events.module.css';
 
 const Events = () => {
@@ -23,10 +24,11 @@ const Events = () => {
                 events.map((el, i) => {
                     console.log(el)
                     return (
-                        <li className={styles.event}>
-                            <p className={styles.name}>{el.name}</p>
-                            <Link href={`/events/${el.name}`}><button>Visit event</button></Link>
-                        </li>
+                        <Event {...el} />
+                        // <li className={styles.event}>
+                        //     <p className={styles.name}>{el.name}</p>
+                        //     <Link href={`/events/${el.name}`}><button>Visit event</button></Link>
+                        // </li>
                     )
                 })
             }

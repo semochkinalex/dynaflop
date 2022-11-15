@@ -1,7 +1,11 @@
 .container {
-    background-color: #BAE8E8;
+    /* background-color: #BAE8E8; */
     padding: 20px;
     border-radius: 20px; 
     width: fit-content;
-    list-style-type: none;  
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 90%;  
 }

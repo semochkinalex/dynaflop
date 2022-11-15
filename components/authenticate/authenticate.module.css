@@ -1,9 +1,11 @@
 .container {
     display: flex;
     padding: 20px 30px;
-    background-color: #BAE8E8;
+    /* background-color: #BAE8E8; */
+    border: 1px solid gray;
     width: fit-content;
     flex-direction: column;
+    margin: auto;
     border-radius: 16px;
 }
 
@@ -31,7 +33,10 @@
 
 .input {
     outline: 1px solid #272343;
+}
 
+.input:focus {
+    outline: 1px solid #3a86ff;
 }
 
 .submit {
@@ -39,7 +44,13 @@
     padding: 10px;
     border: none;
     border-radius: 8px;
-    background-color: #272343;
+    background-color: #3a86ff;
     color: white;
     font-size: 16px;
+    transition: all .2s ease-in-out;
+}
+
+.submit:hover {
+    cursor: pointer;
+    background-color: #2076ff;
 }

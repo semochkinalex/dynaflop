@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { subscribeUser } from '../utils/firebase';
 import { IUser } from '../utils/types';
 import { useRouter } from 'next/router';
+import Header from '../components/header/header';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
@@ -33,22 +34,15 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     localStorage.setItem("username", user?.username || '');
-  }, [user]);
 
-  
+    if (!user) {
+      router.push('/');
+    }
+  }, [user]);
 
   return (
     <UserContext.Provider value={state}>
-      <header className={styles.header}>
-        <div className={styles.profile}>
-          <img className={styles.avatar} alt="Avatar" src="https://www.pngarts.com/files/6/User-Avatar-in-Suit-PNG.png" />
-          <p className={styles.username}>{user?.username} - <span className={styles.balance}>{user?.balance}₽</span></p>
-          <button className={styles.button}>Add Balance</button>
-        </div>
-        {/* <div className={styles.balance}>
-        </div> */}
-        <img className={styles.logout} alt="Logout" src="https://cdn-icons-png.flaticon.com/512/126/126467.png" />
-      </header>
+      <Header />
       <Component {...pageProps} />
     </UserContext.Provider>
   );

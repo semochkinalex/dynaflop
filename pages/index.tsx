@@ -6,17 +6,19 @@ import Profile from '../components/profile/profile'
 import { UserContext } from '../context/user-context'
 import { signupUser, subscribeUser } from '../utils/firebase'
 
+import styles from './index.module.css';
+
 const Home: NextPage = () => {
 
   const [user, setUser] = useContext(UserContext);
 
   return (
-    <main>
+    <main className={styles.main}>
       {
         user ?
         <>
           <Events />
-          <Profile />
+          {/* <Profile /> */}
         </>
         :
         <Authenticate />
