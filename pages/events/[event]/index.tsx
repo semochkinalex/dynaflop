@@ -57,7 +57,7 @@ const Event = () => {
             </div>
 
             <div className={styles.buttons}>
-                <button disabled={userData?.balance < eventData?.currentPrice} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+                <button disabled={(userData?.balance < eventData?.currentPrice)} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
                 <button disabled={userData && userData?.tickets && !userData?.tickets[eventData?.name]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
             </div>

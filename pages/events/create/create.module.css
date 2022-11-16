@@ -1,3 +1,37 @@
+.main {
+    display: flex;
+    align-items: center;
+    height: calc(100vh - 73px);
+    box-sizing: border-box;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 30px;
+    width: 90%;
+    max-width: 300px;
+    margin: auto;
+}
+
 .input {
     padding: 10px;
+    border-radius: 4px;
+    outline: none;
+    border: 1px solid black;
+}
+
+.create {
+    padding: 10px;
+    border-radius: 4px;
+    outline: none;
+    border: none;
+    background-color: #3a86ff;
+    color: white;
 }

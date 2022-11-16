@@ -20,7 +20,10 @@ const Events = () => {
 
     return (
         <ul className={styles.container}>
+            <div className={styles.heading}>
             <h2 className={styles.title}>Events</h2>
+            <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
+            </div>
             {
                 events.map((el, i) => {
                     console.log(el)
@@ -29,6 +32,7 @@ const Events = () => {
                     )
                 })
             }
+            <p className={styles.disclamer}>* events displayed here are not updated in real-time. reload for most relevant information or choose the event itself</p>
         </ul>
     );
 }

@@ -19,25 +19,27 @@ const Create = () => {
     }
 
     const handleSubmit = (e) => {
+        console.log(inputs);
         e.preventDefault();
         if (!inputs) return;
-        const {name, min, max, start, quantity, slippage} = inputs;
-        createEvent(name, userData?.username, start, min, max, quantity, slippage)
+        const {name, max, start, quantity, slippage} = inputs;
+        createEvent(name, userData?.username, start, max, quantity, slippage)
         .catch((err) => {
             console.log(err);
         })
     }
 
     return (
-        <main>
-            <form onSubmit={handleSubmit}>
+        <main className={styles.main}>
+            <form className={styles.form} onSubmit={handleSubmit}>
+            <h1 className={styles.title}>Create Event</h1>
                 <input value={inputs['name']} onChange={handleInput} className={styles.input} type="text" name="name" placeholder='Event Name' required />
                 <input value={inputs['start']} onChange={handleInput} className={styles.input} type="number" name="start" placeholder='Starting price' required />
-                <input value={inputs['min']} onChange={handleInput} className={styles.input} type="number" name="min" min={0} placeholder='Minimum price' required />
+                {/* <input value={inputs['min']} onChange={handleInput} className={styles.input} type="number" name="min" min={0} placeholder='Minimum price' required /> */}
                 <input value={inputs['max']} onChange={handleInput} className={styles.input} type="number" name="max" placeholder='Maximum price' required />
                 <input value={inputs['quantity']} onChange={handleInput} className={styles.input} type="number" name="quantity" min={0} placeholder='Number of tickets' required />
                 <input value={inputs['slippage']} onChange={handleInput} className={styles.input} type="number" name="slippage" placeholder='Slippage in rubles' required />
-                <button type="submit">Create Event</button>
+                <button className={styles.create} type="submit">Create Event</button>
             </form>
         </main>
     )

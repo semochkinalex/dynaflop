@@ -240,13 +240,13 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
     }
 }
 
-export const createEvent = async (name: any, host: any, start: any, min: any, max: any, quantity: any, slippage: any) => {
+export const createEvent = async (name: any, host: any, start: any, max: any, quantity: any, slippage: any) => {
     try {
         await setDoc(doc(firestore, "orders", name), {
             name,
             startingPrice: +start,
             currentPrice: +start,
-            minPrice: +min,
+            minPrice: +start,
             maxPrice: +max,
             available: +quantity,
             quantity: +quantity,

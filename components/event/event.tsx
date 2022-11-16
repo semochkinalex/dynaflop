@@ -7,15 +7,18 @@ interface IEvent {
     currentPrice: number;
 }
 
-const Event: FC<IEvent> = ({name, currentPrice}) => {
+const Event: FC<IEvent> = ({name, currentPrice, quantity, available}) => {
     return (
-        <li className={styles.event}>
-            <p className={`${styles.name} ${styles.text}`}>{name}</p>
-            
-            <p className={`${styles.text} ${styles.price}`}>Price: {currentPrice} ₽</p>
-            
-            <Link href={`/events/${name}`}><button className={styles.visit}>Visit</button></Link>
-        </li>
+        <Link href={`/events/${name}`}>
+            <li className={styles.event}>
+                <p className={`${styles.name} ${styles.text}`}>{name}</p>
+
+                <p className={`${styles.text} ${styles.price}`}>{available}/{quantity}</p>
+
+                <p className={`${styles.text} ${styles.price}`}>Current price: {currentPrice} ₽</p>
+
+            </li>
+        </Link>
     );
 }
 

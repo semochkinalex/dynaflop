@@ -6,7 +6,31 @@
     list-style-type: none;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    /* gap: 10px; */
     width: 90%;  
+    
     max-width: 450px;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.create {
+    outline: none;
+    border: none;
+
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    background-color: #3a86FF;
+}
+
+.disclamer {
+
+    margin-top: 10px;
+    font-size: 12px;
+    color: gray;
 }
