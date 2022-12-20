@@ -39,6 +39,7 @@ const Event = () => {
     return (
         <main className={styles.main}>
             <p className={styles.name}>{event}</p>
+            <span className={styles.host}>by {eventData?.host}</span> 
 
             <div className={styles.tags}>
                 <p className={styles.tag}>{eventData?.minPrice} ₽</p>
@@ -56,15 +57,20 @@ const Event = () => {
                 <p className={styles.tag}>Max. price</p>
             </div>
 
-            <div className={styles.buttons}>
-                <button disabled={(userData?.balance < eventData?.currentPrice)} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+            {
+                userData?.username !== eventData?.host ? 
+                <div className={styles.buttons}>
+                    <button disabled={(userData?.balance < eventData?.currentPrice) || eventData.available == 0} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
-                <button disabled={userData && userData?.tickets && !userData?.tickets[eventData?.name]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
-            </div>
+                    <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+                </div>
+                :
+                <p className={styles.hostmessage}>Cannot purchase nor sell tickets because you are the host</p>
+            }
 
             {
-                userData && userData?.tickets && userData?.tickets[eventData?.name] ?
-                <p className={styles.hint}>You have {userData?.tickets[eventData?.name]} ticket (s)</p>
+                userData && userData?.tickets && eventData?.attendees[userData?.username] ?
+                <p className={styles.hint}>You have {eventData?.attendees[userData?.username]} ticket (s)</p>
                 :
                 ''
             }

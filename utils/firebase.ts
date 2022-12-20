@@ -130,7 +130,7 @@ export const buyTicket = async (eventName: string, userData: any) => {
 
         if (!eventData) return Promise.reject("Failed to fetch event");
         
-        if (eventData?.availabe <= 0) return Promise.reject("No more tickets available");
+        if (eventData?.available <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
         
         const hostRef = doc(firestore, "users", eventData?.host);
@@ -140,13 +140,13 @@ export const buyTicket = async (eventName: string, userData: any) => {
 
         if (!hostData) return Promise.reject("Invalid host.");
 
-        const buyPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
+        const newPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: buyPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
-            balance: userData.balance - buyPrice,
+            balance: userData.balance - eventData.currentPrice,
             tickets: {
                 ...userData.tickets,
                 [eventName]: ticketCount,

@@ -7,6 +7,7 @@ import { buyTicket, createEvent, sellTicket, subscribeEvent } from '../../../uti
 import styles from './create.module.css';
 
 const Create = () => {
+    const router = useRouter();
     const [userData] = useContext(UserContext);
     
     const [inputs, setInputs] = useState({});
@@ -24,6 +25,9 @@ const Create = () => {
         if (!inputs) return;
         const {name, max, start, quantity, slippage} = inputs;
         createEvent(name, userData?.username, start, max, quantity, slippage)
+        .then(() => {
+            router.push('/')
+        })
         .catch((err) => {
             console.log(err);
         })
