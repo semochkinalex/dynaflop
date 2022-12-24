@@ -19,8 +19,7 @@ const Authenticate: FC = () => {
             })
         })
         .catch((err) => {
-            console.log('fail auth')
-            console.log(err);
+            alert(`Fail auth, ${err}`);
         })
     }
 

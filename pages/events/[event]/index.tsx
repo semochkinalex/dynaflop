@@ -24,14 +24,14 @@ const Event = () => {
     const buy = () => {
         buyTicket(event, userData)
         .catch((err) => {
-            console.log(err);
+            alert(`Fail buy ticket, ${err}`);
         })
     }
 
     const sell = () => {
         sellTicket(event, userData)
         .catch((err) => {
-            console.log(err);
+            alert(`Fail sell ticket, ${err}`);
         })
     }
 
@@ -60,7 +60,7 @@ const Event = () => {
             {
                 userData?.username !== eventData?.host ? 
                 <div className={styles.buttons}>
-                    <button disabled={(userData?.balance < eventData?.currentPrice) || eventData.available == 0} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+                    <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.available == 0} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
                     <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
                 </div>

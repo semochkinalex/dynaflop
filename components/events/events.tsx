@@ -10,11 +10,10 @@ const Events = () => {
     useEffect(() => {
         fetchEvents()
         .then((res) => {
-            console.log('wqdqw');
             setEvents(res);
         })
         .catch((err) => {
-            console.log('qwd')
+            alert(`Fail fetch events, ${err}`);
         })
     }, [])
 

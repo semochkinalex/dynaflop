@@ -14,7 +14,7 @@ const Header = () => {
     const add = () => {
       changeBalance(user?.username, 1000)
       .catch((err) => {
-        console.error(err);
+        alert(`Fail add balance, ${err}`);
       })
     }
 
@@ -23,7 +23,7 @@ const Header = () => {
         <header className={styles.header}>
         <div className={styles.profile}>
           <Link href="/">
-            <img className={styles.logo} alt="Home" src="https://i.ibb.co/BfVRT1T/dynaflop-logo.png" />
+            <img className={styles.logo} alt="Home" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThhDL4vHBC0uNyRoeeiV6udG1Ogpp1y3kNa5QkuMQ&s" />
           </Link>
           <Link href="/profile">
             <p className={styles.username}>{user?.username} - <span className={styles.balance}>{user?.balance}₽</span></p>

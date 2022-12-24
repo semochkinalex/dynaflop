@@ -29,7 +29,7 @@ const Create = () => {
             router.push('/')
         })
         .catch((err) => {
-            console.log(err);
+            alert(`Fail create event, ${err}`);
         })
     }
 

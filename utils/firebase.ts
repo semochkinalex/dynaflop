@@ -142,7 +142,7 @@ export const buyTicket = async (eventName: string, userData: any) => {
 
         const newPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
@@ -205,7 +205,7 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
         }
         
         const newPrice = eventData.currentPrice - eventData.slippage < eventData.minPrice ? eventData.minPrice : eventData.currentPrice - eventData.slippage;
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData.available + 1, currentPrice: newPrice, attendees: updatedAttendees});
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available + 1, currentPrice: newPrice, attendees: updatedAttendees});
         
         let updatedUserTickets;
 
