@@ -39,7 +39,7 @@ const Event = () => {
     return (
         <main className={styles.main}>
             <p className={styles.name}>{event}</p>
-            <span className={styles.host}>by {eventData?.host}</span> 
+            <span className={styles.host}>by host {eventData?.host}. Available: {eventData?.available}/{eventData?.quantity}</span> 
 
             <div className={styles.tags}>
                 <p className={styles.tag}>{eventData?.minPrice} ₽</p>
