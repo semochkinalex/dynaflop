@@ -27,7 +27,7 @@ const Events = () => {
                 events.map((el, i) => {
                     console.log(el)
                     return (
-                        <Event {...el} />
+                        <Event key={i} {...el} />
                     )
                 })
             }

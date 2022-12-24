@@ -5,6 +5,8 @@ import styles from './event.module.css';
 interface IEvent {
     name: string;
     currentPrice: number;
+    quantity: number;
+    available: number;
 }
 
 const Event: FC<IEvent> = ({name, currentPrice, quantity, available}) => {
