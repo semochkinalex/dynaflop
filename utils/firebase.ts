@@ -140,6 +140,7 @@ export const buyTicket = async (eventName: string, userData: any) => {
 
         if (!hostData) return Promise.reject("Invalid host.");
 
+        const buyPrice = eventData.currentPrice
         const newPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
         await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
