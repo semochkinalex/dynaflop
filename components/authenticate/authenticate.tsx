@@ -6,20 +6,28 @@ import { UserContext } from '../../context/user-context';
 
 const Authenticate: FC = () => {
 
+    const [errorMessage, setErrorMessage] = useState<string>('');
+
     const [username, setUsername] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+
     
     const [user, setUser] = useContext(UserContext);
 
     const onAuthenticate = (e: any) => {
         e.preventDefault();
-        authenticateUser(username)
+
+        if (!username || !password) return setErrorMessage("You must complete both fields")
+        
+        authenticateUser(username, password)
         .then(() => {
             subscribeUser(username, (data) => {
                 setUser(data)
             })
         })
         .catch((err) => {
-            alert(`Fail auth, ${err}`);
+            console.log(err);
+            setErrorMessage(err);
         })
     }
 
@@ -30,6 +38,11 @@ const Authenticate: FC = () => {
                 <label className={styles.label} htmlFor="username">Username:</label>
                 <input className={styles.input} id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </fieldset>
+            <fieldset className={styles.fieldset}>
+                <label className={styles.label} htmlFor="password">Password:</label>
+                <input className={styles.input} id="password" value={password} type="password" onChange={(e) => setPassword(e.target.value)} />
+            </fieldset>
+            <p className={styles.error}>{errorMessage}</p>
             <button className={styles.submit} type="submit">Submit</button>
         </form>
     );

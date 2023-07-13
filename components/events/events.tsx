@@ -6,33 +6,54 @@ import styles from './events.module.css';
 
 const Events = () => {
     const [events, setEvents] = useState([]);
+    const [lastUpdatedTime, setLastUpdatedTime] = useState<Date>();
 
-    useEffect(() => {
+    const getEvents = () => {
         fetchEvents()
         .then((res) => {
             setEvents(res);
+            setLastUpdatedTime(Date.now());
+            console.log("updated data");
         })
         .catch((err) => {
             alert(`Fail fetch events, ${err}`);
         })
+    }
+
+    useEffect(() => {
+        // initial fetch
+        getEvents();
+    
+        const interval = setInterval(() => {
+            getEvents();
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, [])
 
     return (
-        <ul className={styles.container}>
-            <div className={styles.heading}>
-            <h2 className={styles.title}>Events</h2>
-            <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
-            </div>
-            {
-                events.map((el, i) => {
-                    console.log(el)
-                    return (
-                        <Event key={i} {...el} />
-                    )
-                })
-            }
-            <p className={styles.disclamer}>* events displayed here are not updated in real-time. reload for most relevant information or choose the event itself</p>
-        </ul>
+            events?.length ?
+            <>
+                <ul className={styles.container}>
+                <div className={styles.heading}>
+                <h2 className={styles.title}>Events</h2>
+                <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
+                </div>
+                {
+                    events.filter((el) => !el?.closed).map((el, i) => {
+                        return (
+                            <Event key={i} {...el} />
+                        )
+                    })
+                }
+                <p className={styles.disclamer}>Last updated: {new Date(lastUpdatedTime).toUTCString()}</p>
+                </ul>
+            </>
+            :
+            <section className={styles.container}>
+                <h2 className={styles.empty}>There are no events yet. Start the change!</h2>
+                <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
+            </section>
     );
 }
 

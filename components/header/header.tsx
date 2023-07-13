@@ -23,7 +23,7 @@ const Header = () => {
         <header className={styles.header}>
         <div className={styles.profile}>
           <Link href="/">
-            <img className={styles.logo} alt="Home" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThhDL4vHBC0uNyRoeeiV6udG1Ogpp1y3kNa5QkuMQ&s" />
+            <img className={styles.logo} alt="Home" src="https://cdn-icons-png.flaticon.com/512/5132/5132722.png" />
           </Link>
           <Link href="/profile">
             <p className={styles.username}>{user?.username} - <span className={styles.balance}>{user?.balance}₽</span></p>

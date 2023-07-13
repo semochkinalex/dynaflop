@@ -65,7 +65,14 @@ export const subscribeEvent = async (event: string, callback: (fetchedEvent: any
 
 }
 
-export const authenticateUser = async (username: string) => {
+export const authenticateUser = async (username: string, password: string) => {
+
+    const passwordRegexp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+    
+    if (!passwordRegexp.test(password)) {
+        return Promise.reject("Your password must include minimum eight characters, at least one letter and one number")
+    }
+
     const userRef = doc(firestore, "users", username);
     const userSnap = await getDoc(userRef);
 
@@ -74,19 +81,25 @@ export const authenticateUser = async (username: string) => {
 
         const data: IUser = {
             username: username,
-            balance: 1000,    
+            password: password,
+            balance: 0,    
         }
 
         try {
+
             await setDoc(doc(firestore, "users", username), data);
             return Promise.resolve(data);
+
         } catch (err) {
-            console.log(err);
             return Promise.reject(err);
         }
         
     } else {
-        return Promise.resolve(userSnap.data());
+        if (userSnap.data().password === password) {
+            return Promise.resolve(userSnap.data());
+        } else {
+            return Promise.reject("Incorrect Password");
+        }
     }
 };
 
@@ -121,6 +134,23 @@ export const fetchEvents = async () => {
     }
 }
 
+export const togglePauseEvent =async (eventName: string, username: string, value: boolean) => {
+    try {
+        const eventRef = doc(firestore, "orders", eventName);
+        const eventSnap = await getDoc(eventRef);
+
+        const eventData = eventSnap.data();
+
+        if (!eventData) return Promise.reject("Failed to fetch event");
+        
+        if (eventData.host !== username) return Promise.reject("You are not the host");
+        await setDoc(doc(firestore, "orders", eventName), {...eventData, closed: value});
+    
+    } catch (err) {
+        return Promise.reject(err);
+    }
+}
+
 export const buyTicket = async (eventName: string, userData: any) => {
     try {
         const eventRef = doc(firestore, "orders", eventName);
@@ -140,7 +170,7 @@ export const buyTicket = async (eventName: string, userData: any) => {
 
         if (!hostData) return Promise.reject("Invalid host.");
 
-        const buyPrice = eventData.currentPrice
+        const buyPrice = eventData.currentPrice;
         const newPrice = eventData.currentPrice + eventData.slippage > eventData.maxPrice ? eventData.maxPrice : eventData.currentPrice + eventData.slippage;
         const ticketCount = eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0 ? eventData['attendees'][userData.username] + 1 : 1;
         await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
@@ -254,6 +284,7 @@ export const createEvent = async (name: any, host: any, start: any, max: any, qu
             slippage: +slippage,
             attendees: {},
             host,
+            closed: false,
         });
 
         return Promise.resolve();

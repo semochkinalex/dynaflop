@@ -6,7 +6,7 @@
 }
 
 .title {
-    text-align: center;
+    /* text-align: center; */
     margin-bottom: 10px;
 }
 
@@ -34,4 +34,24 @@
     border: none;
     background-color: #3a86ff;
     color: white;
+}
+
+.create:hover {
+    cursor: pointer;
+}
+
+.fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 0;
+    margin: 0 0 20px 0;
+    border: none;
+    outline: none;
+}
+
+.hint {
+    color: gray;
+    font-size: 12px;
 }

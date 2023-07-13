@@ -10,7 +10,11 @@ const Profile = () => {
         <main className={styles.main}>
             <img className={styles.avatar} alt="Avatar" src="https://www.pngarts.com/files/6/User-Avatar-in-Suit-PNG.png" />
             <p className={styles.name}>{user?.username}</p>
-            <p className={styles.balance}>Balance: {user?.balance}₽</p>
+            <p className={styles.balance}>Balance: ${user?.balance}</p>
+            <div className={styles.row}>
+                <p>Name</p>
+                <p>Amount of tickets</p>
+            </div>
             <ul className={styles.list}>
             {
                 user?.tickets ?
@@ -22,7 +26,7 @@ const Profile = () => {
 
                             <p className={`${styles.event} ${styles.text}`}>{name}</p>
 
-                            <p className={`${styles.text} ${styles.price}`}>Quantity: {quantity}</p>
+                            <p className={`${styles.text} ${styles.price}`}>{quantity} tickets</p>
 
                             </li>
                         </Link>

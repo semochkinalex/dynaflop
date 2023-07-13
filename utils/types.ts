@@ -11,6 +11,7 @@ export interface IOrder {
 
 export interface IUser {
     username: string;
+    password: string;
     balance: number;
 
     buy?: IOrder[];

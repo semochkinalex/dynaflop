@@ -2,11 +2,13 @@
     display: flex;
     padding: 20px 30px;
     /* background-color: #BAE8E8; */
-    border: 1px solid gray;
-    width: fit-content;
+    background-color: rgba(36,36,36,.07);
+    /* width: fit-content; */
     flex-direction: column;
     margin: auto;
     border-radius: 16px;
+    gap: 10px;
+    width: 300px;
 }
 
 .title{
@@ -19,7 +21,7 @@
     border: none;
     display: flex;
     gap: 5px;
-
+    width: 100%;
     /* flex-direction: column; */
 }
 
@@ -29,6 +31,7 @@
     border-radius: 4px;
     border: none;
     outline: none;
+    width: 100%;
 }
 
 .input {
@@ -53,4 +56,9 @@
 .submit:hover {
     cursor: pointer;
     background-color: #2076ff;
+}
+
+.error {
+    color: crimson;
+    font-size: 14px;
 }

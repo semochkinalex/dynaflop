@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 import SetOrder from '../../../components/set-order/set-order';
 import { UserContext } from '../../../context/user-context';
-import { buyTicket, sellTicket, subscribeEvent } from '../../../utils/firebase';
+import { buyTicket, togglePauseEvent, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
 
 const Event = () => {
@@ -38,13 +38,13 @@ const Event = () => {
     // console.log(((eventData?.currentPrice - eventData?.minPrice) / (eventData.maxPrice - eventData?.minPrice)) * 100)
     return (
         <main className={styles.main}>
-            <p className={styles.name}>{event}</p>
-            <span className={styles.host}>by host {eventData?.host}. Available: {eventData?.available}/{eventData?.quantity}</span> 
+            <p className={styles.name}>Event: {event}</p>
+            <span className={styles.host}>By {eventData?.host}. Number of tickets: {eventData?.available}/{eventData?.quantity}</span> 
 
             <div className={styles.tags}>
-                <p className={styles.tag}>{eventData?.minPrice} ₽</p>
+                <p className={styles.tag}>${eventData?.minPrice}</p>
                 
-                <p className={styles.tag}>{eventData?.maxPrice} ₽</p>
+                <p className={styles.tag}>${eventData?.maxPrice}</p>
             </div>
             
             <div className={styles.bar}><div className={styles.progress} style={{
@@ -59,13 +59,19 @@ const Event = () => {
 
             {
                 userData?.username !== eventData?.host ? 
+                (
+                !eventData?.closed 
+                ?
                 <div className={styles.buttons}>
                     <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.available == 0} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
                     <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
                 </div>
                 :
-                <p className={styles.hostmessage}>Cannot purchase nor sell tickets because you are the host</p>
+                <p className={styles.closed}>The event is closed</p>
+                )
+                :
+                <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.closed)}>{eventData?.closed ? "Unpause this event" : "Pause this event"}</button>
             }
 
             {

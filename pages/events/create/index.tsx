@@ -23,10 +23,13 @@ const Create = () => {
         console.log(inputs);
         e.preventDefault();
         if (!inputs) return;
+
+        //@ts-ignore
         const {name, max, start, quantity, slippage} = inputs;
+        
         createEvent(name, userData?.username, start, max, quantity, slippage)
         .then(() => {
-            router.push('/')
+            router.push(`/events/${name}`)
         })
         .catch((err) => {
             alert(`Fail create event, ${err}`);
@@ -36,13 +39,20 @@ const Create = () => {
     return (
         <main className={styles.main}>
             <form className={styles.form} onSubmit={handleSubmit}>
-            <h1 className={styles.title}>Create Event</h1>
-                <input value={inputs['name']} onChange={handleInput} className={styles.input} type="text" name="name" placeholder='Event Name' required />
-                <input value={inputs['start']} onChange={handleInput} className={styles.input} type="number" name="start" placeholder='Starting price' required />
+            <h1 className={styles.title}>Start the change!</h1>
+                <fieldset className={styles.fieldset}>
+                    <label className={styles.label} htmlFor="name">Name of your event</label>
+                    <input value={inputs['name']} id="name" onChange={handleInput} className={styles.input} type="text" name="name" placeholder="Alex's computer science workshop" required />
+                </fieldset>
+                <fieldset className={styles.fieldset}>
+                    <label className={styles.label} htmlFor="start">Dynamic pricing settings</label>
+                    <input value={inputs['start']} onChange={handleInput} className={styles.input} type="number" name="start" placeholder='Starting price - $10' required />
+                    <input value={inputs['max']} onChange={handleInput} className={styles.input} type="number" name="max" placeholder='Maximum price - $30' required />
+                    <input value={inputs['quantity']} onChange={handleInput} className={styles.input} type="number" name="quantity" min={0} placeholder='Number of tickets - 100' required />
+                    <input value={inputs['slippage']} onChange={handleInput} className={styles.input} type="number" name="slippage" placeholder='Slippage in USD - $1' required />
+                    <span className={styles.hint}>^ Input only numerical data. Fields above are examples.</span>
+                </fieldset>
                 {/* <input value={inputs['min']} onChange={handleInput} className={styles.input} type="number" name="min" min={0} placeholder='Minimum price' required /> */}
-                <input value={inputs['max']} onChange={handleInput} className={styles.input} type="number" name="max" placeholder='Maximum price' required />
-                <input value={inputs['quantity']} onChange={handleInput} className={styles.input} type="number" name="quantity" min={0} placeholder='Number of tickets' required />
-                <input value={inputs['slippage']} onChange={handleInput} className={styles.input} type="number" name="slippage" placeholder='Slippage in rubles' required />
                 <button className={styles.create} type="submit">Create Event</button>
             </form>
         </main>

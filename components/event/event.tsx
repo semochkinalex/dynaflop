@@ -17,7 +17,7 @@ const Event: FC<IEvent> = ({name, currentPrice, quantity, available}) => {
 
                 <p className={`${styles.text} ${styles.price}`}>{available}/{quantity}</p>
 
-                <p className={`${styles.text} ${styles.price}`}>Current price: {currentPrice} ₽</p>
+                <p className={`${styles.text} ${styles.price}`}>${currentPrice}</p>
 
             </li>
         </Link>
