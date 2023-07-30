@@ -14,6 +14,9 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  images: {
+        domains: ['www.pngarts.com', 'cdn-icons-png.flaticon.com'],
+  }
 }
 
 module.exports = nextConfig

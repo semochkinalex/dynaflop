@@ -1,27 +1,29 @@
-// import Authenticate from '../../components/authenticate/authenticate';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
-import SetOrder from '../../../components/set-order/set-order';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../context/user-context';
 import { buyTicket, togglePauseEvent, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
+import Link from 'next/link';
+import { ParsedUrlQuery } from 'querystring';
+import { IEvent } from '../../../utils/types';
 
 const Event = () => {
     const router = useRouter();
+    const {event} = router.query as ParsedUrlQuery ;
+
     const [userData] = useContext(UserContext);
+    const [eventData, setEventData] = useState<IEvent>();
 
-    const [eventData, setEventData] = useState();
-
-    console.log(userData?.tickets)
-
-    const {event} = router.query;
+    const [progressBarWidth, setProgressBarWidth] = useState(0);
 
     useEffect(() => {
-        if (!event) return;
+        if (!event || typeof event != 'string') return; // typescript error-handling
         subscribeEvent(event, setEventData);
     }, [event]);
 
     const buy = () => {
+        if (!event || typeof event != 'string') return; // typescript error-handling
+
         buyTicket(event, userData)
         .catch((err) => {
             alert(`Fail buy ticket, ${err}`);
@@ -29,14 +31,20 @@ const Event = () => {
     }
 
     const sell = () => {
+        if (!event || typeof event != 'string') return; // typescript error-handling
+        
         sellTicket(event, userData)
         .catch((err) => {
             alert(`Fail sell ticket, ${err}`);
         })
     }
 
-    // console.log(((eventData?.currentPrice - eventData?.minPrice) / (eventData.maxPrice - eventData?.minPrice)) * 100)
+    useEffect(() => {
+        setProgressBarWidth(((eventData?.currentPrice - eventData?.minPrice) / (eventData?.maxPrice - eventData?.minPrice)) * 100);
+    }, [eventData]);
+
     return (
+        eventData ?
         <main className={styles.main}>
             <p className={styles.name}>Event: {event}</p>
             <span className={styles.host}>By {eventData?.host}. Number of tickets: {eventData?.available}/{eventData?.quantity}</span> 
@@ -47,9 +55,7 @@ const Event = () => {
                 <p className={styles.tag}>${eventData?.maxPrice}</p>
             </div>
             
-            <div className={styles.bar}><div className={styles.progress} style={{
-                width: `${((eventData?.currentPrice - eventData?.minPrice) / (eventData?.maxPrice - eventData?.minPrice)) * 100}%`
-            }}></div></div>
+            <div className={styles.bar}><div className={styles.progress} style={{ width: `${progressBarWidth}%` }}></div></div>
 
             <div className={styles.tags}>
                 <p className={styles.tag}>Min. price</p>
@@ -60,27 +66,35 @@ const Event = () => {
             {
                 userData?.username !== eventData?.host ? 
                 (
-                !eventData?.closed 
-                ?
-                <div className={styles.buttons}>
-                    <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.available == 0} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+                    !eventData?.closed ?
+                    // if event is open and the person is not the host
+                        <div className={styles.buttons}>
+                            <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.available == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
-                    <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username]} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
-                </div>
-                :
-                <p className={styles.closed}>The event is closed</p>
+                            <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+                        </div>
+                    :
+                    // if the event is closed
+                        <p className={styles.closed}>The event is closed</p>
                 )
                 :
+                // if it's the host
                 <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.closed)}>{eventData?.closed ? "Unpause this event" : "Pause this event"}</button>
             }
 
             {
+                // if user has tickets -> we display them
                 userData && userData?.tickets && eventData?.attendees[userData?.username] ?
                 <p className={styles.hint}>You have {eventData?.attendees[userData?.username]} ticket (s)</p>
                 :
                 ''
             }
-            {/* <SetOrder minPrice={eventData?.minPrice} maxPrice={eventData?.maxPrice} onSubmit={handleSetOrder} /> */}
+
+        </main>
+        :
+        <main className={styles.main}>
+            <p>Could not find the event</p>  
+            <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
         </main>
     )
 }

@@ -6,7 +6,6 @@
 }
 
 .title {
-    /* text-align: center; */
     margin-bottom: 10px;
 }
 
@@ -54,4 +53,9 @@
 .hint {
     color: gray;
     font-size: 12px;
+}
+
+.error {
+    color: crimson;
+    font-size: 14px;
 }

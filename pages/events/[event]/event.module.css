@@ -125,3 +125,18 @@
     border-radius: 8px;
     margin-top: 12px;
 }
+
+.create {
+    outline: none;
+    border: none;
+
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    background-color: #3a86FF;
+    margin-top: 20px;
+    min-width: 200px;
+}
+.create:hover {
+    cursor: pointer;
+}

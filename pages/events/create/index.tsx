@@ -1,16 +1,17 @@
-// import Authenticate from '../../components/authenticate/authenticate';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
 import { UserContext } from '../../../context/user-context';
 import { buyTicket, createEvent, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './create.module.css';
+import { ICreateEventInputs } from '../../../utils/types';
 
 const Create = () => {
     const router = useRouter();
+    const [errorMessage, setErrorMessage] = useState<string>('');
     const [userData] = useContext(UserContext);
     
-    const [inputs, setInputs] = useState({});
+    const [inputs, setInputs] = useState<ICreateEventInputs | {}>({});
 
     const handleInput = e => {
         setInputs({
@@ -20,19 +21,19 @@ const Create = () => {
     }
 
     const handleSubmit = (e) => {
-        console.log(inputs);
         e.preventDefault();
-        if (!inputs) return;
+        if (!inputs) return setErrorMessage("Invalid inputs");
 
-        //@ts-ignore
-        const {name, max, start, quantity, slippage} = inputs;
+        const {name, max, start, quantity, slippage} = inputs as ICreateEventInputs;
         
+        if (start > max) return setErrorMessage("Starting price can't be higher than the max")
+
         createEvent(name, userData?.username, start, max, quantity, slippage)
         .then(() => {
             router.push(`/events/${name}`)
         })
-        .catch((err) => {
-            alert(`Fail create event, ${err}`);
+        .catch((error) => {
+            setErrorMessage(error);
         })
     }
 
@@ -51,8 +52,8 @@ const Create = () => {
                     <input value={inputs['quantity']} onChange={handleInput} className={styles.input} type="number" name="quantity" min={0} placeholder='Number of tickets - 100' required />
                     <input value={inputs['slippage']} onChange={handleInput} className={styles.input} type="number" name="slippage" placeholder='Slippage in USD - $1' required />
                     <span className={styles.hint}>^ Input only numerical data. Fields above are examples.</span>
+                    <p className={styles.error}>{errorMessage}</p>
                 </fieldset>
-                {/* <input value={inputs['min']} onChange={handleInput} className={styles.input} type="number" name="min" min={0} placeholder='Minimum price' required /> */}
                 <button className={styles.create} type="submit">Create Event</button>
             </form>
         </main>

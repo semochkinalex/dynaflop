@@ -22,11 +22,12 @@ const Authenticate: FC = () => {
         authenticateUser(username, password)
         .then(() => {
             subscribeUser(username, (data) => {
-                setUser(data)
+                setUser(data);
+                console.log(data);
+                console.log('update')
             })
         })
         .catch((err) => {
-            console.log(err);
             setErrorMessage(err);
         })
     }
@@ -44,6 +45,7 @@ const Authenticate: FC = () => {
             </fieldset>
             <p className={styles.error}>{errorMessage}</p>
             <button className={styles.submit} type="submit">Submit</button>
+            <p className={styles.disclamer}>We don't encrypt your passwords. Don't use your real one</p>
         </form>
     );
 }

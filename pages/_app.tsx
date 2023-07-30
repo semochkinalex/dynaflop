@@ -2,10 +2,8 @@ import type { AppProps } from 'next/app';
 
 import '../global.css';
 
-import styles from './app.module.css';
-
 import { UserContext } from '../context/user-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { subscribeUser } from '../utils/firebase';
 import { IUser } from '../utils/types';
 import { useRouter } from 'next/router';
@@ -13,20 +11,28 @@ import Header from '../components/header/header';
 
 function MyApp({ Component, pageProps }: AppProps) {
 
-  const [unsubscribe, setUnsubscribe] = useState();
   const router = useRouter();
-  const state = useState<null | IUser>(null);
+  const { asPath } = useRouter();
 
+  const state = useState<null | IUser>(null);
   const [user, setUser] = state;
 
+  // To save routing history (if someone enters a specific route he can return to it after authentication)
+  const ref = useRef<string>("/");
+
   useEffect(() => {
-    let unsubscribe;
+    ref.current = asPath;
+  }, [asPath]);
+
+  useEffect(() => {
+
     const loadedUsername = localStorage.getItem("username"); 
 
     if (loadedUsername) {
       
-      unsubscribe = subscribeUser(loadedUsername, (user) => {
-        setUser(user);
+      subscribeUser(loadedUsername, (data) => {
+          setUser(data);
+          router.push(ref.current);
       })
 
     }
@@ -35,9 +41,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {
     localStorage.setItem("username", user?.username || '');
 
-    if (!user) {
-      router.push('/');
-    }
+    router.push(user ? ref.current : '/');
   }, [user]);
 
   return (
@@ -49,5 +53,3 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 export default MyApp
-
-// https://colorhunt.co/palette/272343ffffffe3f6f5bae8e8

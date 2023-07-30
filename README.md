@@ -1,1 +1,1 @@
-MVP demo - https://dynaflop-ri70l8qy7-fennyflop.vercel.app/
+MVP demo - https://dynaflop-22mxuja2m-fennyflop.vercel.app/

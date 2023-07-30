@@ -8,6 +8,7 @@
     justify-content: space-between;
     /* position: fixed; */
     border-bottom: 1px solid black;
+    z-index: 100;
 }
 
 .logo {
@@ -36,9 +37,7 @@
 .logout {
     width: 30px;
     height: 30px;
-    padding: 10px;
     transition: all .2s ease-in-out;
-    background-color: #3a86ff;
     border-radius: 8px;
 }
 .logout:hover {

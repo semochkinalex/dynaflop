@@ -6,14 +6,13 @@ import styles from './events.module.css';
 
 const Events = () => {
     const [events, setEvents] = useState([]);
-    const [lastUpdatedTime, setLastUpdatedTime] = useState<Date>();
+    const [lastUpdatedTime, setLastUpdatedTime] = useState<Date | number>();
 
     const getEvents = () => {
         fetchEvents()
         .then((res) => {
             setEvents(res);
             setLastUpdatedTime(Date.now());
-            console.log("updated data");
         })
         .catch((err) => {
             alert(`Fail fetch events, ${err}`);
@@ -24,6 +23,7 @@ const Events = () => {
         // initial fetch
         getEvents();
     
+        // repeating fetch
         const interval = setInterval(() => {
             getEvents();
         }, 5000);
