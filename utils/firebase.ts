@@ -85,6 +85,7 @@ export const authenticateUser = async (username: string, password: string) => {
     
     // if it does exist -> we check the password
     } else {
+        console.l
         if (passwordHash.verify(password, userSnap.data().password)) {
             return Promise.resolve(userSnap.data());
         } else {
