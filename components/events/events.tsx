@@ -40,7 +40,7 @@ const Events = () => {
                 <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
                 </div>
                 {
-                    events.filter((el) => !el?.closed).map((el, i) => {
+                    events.filter((el) => !el?.isClosed).map((el, i) => {
                         return (
                             <Event key={i} {...el} />
                         )

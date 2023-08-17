@@ -47,7 +47,7 @@ const Event = () => {
         eventData ?
         <main className={styles.main}>
             <p className={styles.name}>Event: {event}</p>
-            <span className={styles.host}>By {eventData?.host}. Number of tickets: {eventData?.available}/{eventData?.quantity}</span> 
+            <span className={styles.host}>By {eventData?.host}. Number of tickets: {eventData?.numberOfAvailableTickets}/{eventData?.numberOfTotalTickets}</span> 
 
             <div className={styles.tags}>
                 <p className={styles.tag}>${eventData?.minPrice}</p>
@@ -66,20 +66,20 @@ const Event = () => {
             {
                 userData?.username !== eventData?.host ? 
                 (
-                    !eventData?.closed ?
+                    !eventData?.isClosed ?
                     // if event is open and the person is not the host
                         <div className={styles.buttons}>
-                            <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.available == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+                            <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.numberOfAvailableTickets == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
                             <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
                         </div>
                     :
                     // if the event is closed
-                        <p className={styles.closed}>The event is closed</p>
+                        <p className={styles.isClosed}>The event is closed</p>
                 )
                 :
                 // if it's the host
-                <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.closed)}>{eventData?.closed ? "Unpause this event" : "Pause this event"}</button>
+                <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.isClosed)}>{eventData?.isClosed ? "Unpause this event" : "Pause this event"}</button>
             }
 
             {

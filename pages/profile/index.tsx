@@ -10,14 +10,14 @@ const Profile = () => {
     const tickets = useMemo(() => {
         return (
             user?.tickets ?
-                Object.entries(user?.tickets).map(([name, quantity], i) => {
+                Object.entries(user?.tickets).map(([name, numberOfTotalTickets], i) => {
                     return (
                         <Link href={`/events/${name}`} key={i}>
                             <li className={styles.element}>
 
                             <p className={`${styles.event} ${styles.text}`}>{name}</p>
 
-                            <p className={`${styles.text} ${styles.price}`}>{quantity as unknown as number} tickets</p>
+                            <p className={`${styles.text} ${styles.price}`}>{numberOfTotalTickets as unknown as number} tickets</p>
 
                             </li>
                         </Link>
@@ -30,7 +30,7 @@ const Profile = () => {
     
     return (
         <main className={styles.main}>
-            <Image className={styles.avatar} alt="Avatar" src="/avatar.png" width={150} height={150} />
+            {/* <Image className={styles.avatar} alt="Avatar" src="/avatar.png" width={150} height={150} />
             <p className={styles.name}>{user?.username}</p>
             <p className={styles.balance}>Balance: ${user?.balance}</p>
             <div className={styles.row}>
@@ -39,7 +39,7 @@ const Profile = () => {
             </div>
             <ul className={styles.list}>
             { tickets }
-            </ul>
+            </ul> */}
         </main>
     );
 }

@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
 import { UserContext } from '../../../context/user-context';
-import { buyTicket, createEvent, sellTicket, subscribeEvent } from '../../../utils/firebase';
+import { buyTicket, createEvent, isEventNameAvailable, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './create.module.css';
 import { ICreateEventInputs } from '../../../utils/types';
 
@@ -24,17 +24,26 @@ const Create = () => {
         e.preventDefault();
         if (!inputs) return setErrorMessage("Invalid inputs");
 
-        const {name, max, start, quantity, slippage} = inputs as ICreateEventInputs;
+        const {name, max, start, numberOfTotalTickets, slippage} = inputs as ICreateEventInputs;
         
-        if (start > max) return setErrorMessage("Starting price can't be higher than the max")
+        if (start > max) return setErrorMessage("Starting price can't be higher than the max");
+        if (start <= 0 ||  max <= 0 || numberOfTotalTickets <= 0 || slippage <= 0) return setErrorMessage("The starting, maximum, slippage and the number of tickets must be above zero");
 
-        createEvent(name, userData?.username, start, max, quantity, slippage)
-        .then(() => {
-            router.push(`/events/${name}`)
+        isEventNameAvailable(name).then((isAvailable) => {
+            if (!isAvailable) {
+                return setErrorMessage("Event name is taken")
+            } else {
+                createEvent(name, userData?.username, start, max, numberOfTotalTickets, slippage)
+                .then(() => {
+                    router.push(`/events/${name}`)
+                })
+                .catch((error) => {
+                    setErrorMessage(error);
+                })
+            }
+
         })
-        .catch((error) => {
-            setErrorMessage(error);
-        })
+
     }
 
     return (
@@ -49,7 +58,7 @@ const Create = () => {
                     <label className={styles.label} htmlFor="start">Dynamic pricing settings</label>
                     <input value={inputs['start']} onChange={handleInput} className={styles.input} type="number" name="start" placeholder='Starting price - $10' required />
                     <input value={inputs['max']} onChange={handleInput} className={styles.input} type="number" name="max" placeholder='Maximum price - $30' required />
-                    <input value={inputs['quantity']} onChange={handleInput} className={styles.input} type="number" name="quantity" min={0} placeholder='Number of tickets - 100' required />
+                    <input value={inputs['numberOfTotalTickets']} onChange={handleInput} className={styles.input} type="number" name="numberOfTotalTickets" min={0} placeholder='Number of tickets - 100' required />
                     <input value={inputs['slippage']} onChange={handleInput} className={styles.input} type="number" name="slippage" placeholder='Slippage in USD - $1' required />
                     <span className={styles.hint}>^ Input only numerical data. Fields above are examples.</span>
                     <p className={styles.error}>{errorMessage}</p>

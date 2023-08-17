@@ -11,20 +11,21 @@ const Authenticate: FC = () => {
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
 
+    const loginRegexp = new RegExp(/^[a-zA-Z]*$/);
+
     
     const [user, setUser] = useContext(UserContext);
 
     const onAuthenticate = (e: any) => {
         e.preventDefault();
-
-        if (!username || !password) return setErrorMessage("You must complete both fields")
+        console.log(username.length, username.length >= 2)
+        if (!username || !password) return setErrorMessage("You must complete both fields");
+        if (!loginRegexp.test(username) || username.length < 2) return setErrorMessage("Username must contain only letters and have at least 2 characters");
         
         authenticateUser(username, password)
         .then(() => {
             subscribeUser(username, (data) => {
                 setUser(data);
-                console.log(data);
-                console.log('update')
             })
         })
         .catch((err) => {

@@ -2,8 +2,9 @@
 import { initializeApp } from "firebase/app";
 import { addDoc, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, setDoc } from "firebase/firestore";
 import { IEvent, IUser } from "./types";
+import passwordHash from 'password-hash';
 // TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// https://firebase.google.com/docs/web/setup#numberOfAvailableTickets-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -36,7 +37,7 @@ export const subscribeUser = async (username: string, callback: (user: any) => v
 // Recieve updates on the event's changes.
 export const subscribeEvent = async (event: string, callback: (fetchedEvent: any) => void) => {
     try {
-        const unsub = onSnapshot(doc(firestore, "orders", event), (fetchedEvent) => {
+        const unsub = onSnapshot(doc(firestore, "events", event), (fetchedEvent) => {
             callback(fetchedEvent.data());
         });
         return Promise.resolve(unsub);
@@ -44,6 +45,17 @@ export const subscribeEvent = async (event: string, callback: (fetchedEvent: any
         return Promise.reject(err);
     }
 
+}
+
+export const isEventNameAvailable =async (eventName:string) => {
+    try {
+        const eventRef = doc(firestore, "events", eventName);
+        const eventSnap = await getDoc(eventRef);
+
+        return !eventSnap.exists();
+    } catch {
+        return false;
+    }
 }
 
 // If there is an existing account -> login into it. If there is no account -> create it
@@ -57,12 +69,13 @@ export const authenticateUser = async (username: string, password: string) => {
 
     const userRef = doc(firestore, "users", username);
     const userSnap = await getDoc(userRef);
-
+    
     // If an account doesn't exist, we create it.
     if (!userSnap.exists()) {
-
-        const userData: IUser = { username, password, balance: 0 }
-
+        
+        const encryptedPassword = passwordHash.generate(password);
+        const userData: IUser = { username, password: encryptedPassword, balance: 0 }
+ 
         try {
             await setDoc(doc(firestore, "users", username), userData);
             return Promise.resolve(userData);
@@ -72,7 +85,7 @@ export const authenticateUser = async (username: string, password: string) => {
     
     // if it does exist -> we check the password
     } else {
-        if (userSnap.data().password === password) {
+        if (passwordHash.verify(password, userSnap.data().password)) {
             return Promise.resolve(userSnap.data());
         } else {
             return Promise.reject("Incorrect Password");
@@ -98,7 +111,7 @@ export const changeBalance = async (username: string, amount: number) => {
 export const fetchEvents = async () => {
     try {
         const events: IEvent[] = [];
-        const querySnapshot = await getDocs(collection(firestore, "orders"));
+        const querySnapshot = await getDocs(collection(firestore, "events"));
 
         querySnapshot.forEach((doc) => {
 
@@ -115,7 +128,7 @@ export const fetchEvents = async () => {
 
 export const togglePauseEvent = async (eventName: string, username: string, value: boolean) => {
     try {
-        const eventRef = doc(firestore, "orders", eventName);
+        const eventRef = doc(firestore, "events", eventName);
         const eventSnap = await getDoc(eventRef);
 
         const eventData = eventSnap.data();
@@ -124,7 +137,7 @@ export const togglePauseEvent = async (eventName: string, username: string, valu
         
         if (eventData.host !== username) return Promise.reject("You are not the host");
              
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, closed: value});
+        await setDoc(doc(firestore, "events", eventName), {...eventData, isClosed: value});
     
     } catch (err) {
         return Promise.reject(err);
@@ -142,7 +155,7 @@ const calculateTicketPrice = (price: number, min: number, max: number, slippage:
 export const buyTicket = async (eventName: string, userData: IUser) => {
     try {
         // Get all information about the event
-        const eventRef = doc(firestore, "orders", eventName);
+        const eventRef = doc(firestore, "events", eventName);
         const eventSnap = await getDoc(eventRef);
         const eventData = eventSnap.data();
 
@@ -155,7 +168,7 @@ export const buyTicket = async (eventName: string, userData: IUser) => {
         if (!eventData) return Promise.reject("Failed to fetch event");
         if (!hostData) return Promise.reject("Invalid host.");
         
-        if (eventData?.available <= 0) return Promise.reject("No more tickets available");
+        if (eventData?.numberOfAvailableTickets <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
         
         const buyPrice = eventData.currentPrice;
@@ -167,7 +180,7 @@ export const buyTicket = async (eventName: string, userData: IUser) => {
         const ticketCount = (eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0) ? eventData['attendees'][userData.username] + 1 : 1;
         
         // Update event's data
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
+        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
         
         // Pay the host
         await setDoc(doc(firestore, "users", hostData.username), {
@@ -194,7 +207,7 @@ export const buyTicket = async (eventName: string, userData: IUser) => {
 export const sellTicket = async (eventName: string, userData: IUser) => {
     try {
 
-        const eventRef = doc(firestore, "orders", eventName);
+        const eventRef = doc(firestore, "events", eventName);
         const eventSnap = await getDoc(eventRef);
         const eventData = eventSnap.data();
 
@@ -226,7 +239,7 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
         const newPrice = calculateTicketPrice(currentPrice, minPrice, maxPrice, slippage, false);
 
         // change the event
-        await setDoc(doc(firestore, "orders", eventName), {...eventData, available: eventData?.available + 1, currentPrice: newPrice, attendees: updatedAttendees});
+        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets + 1, currentPrice: newPrice, attendees: updatedAttendees});
         
         // track the user's tickets
         let updatedUserTickets;
@@ -262,19 +275,19 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
     }
 }
 
-export const createEvent = async (name: any, host: any, start: any, max: any, quantity: any, slippage: any) => {
+export const createEvent = async (name: any, host: any, start: any, max: any, numberOfTotalTickets: any, slippage: any) => {
     try {
-        await setDoc(doc(firestore, "orders", name), {
+        await setDoc(doc(firestore, "events", name), {
             name,
             host,
             attendees: {},
-            closed: false,
+            isClosed: false,
             startingPrice: Number(start),
             currentPrice: Number(start),
             minPrice: Number(start),
             maxPrice: Number(max),
-            available: Number(quantity),
-            quantity: Number(quantity),
+            numberOfAvailableTickets: Number(numberOfTotalTickets),
+            numberOfTotalTickets: Number(numberOfTotalTickets),
             slippage: Number(slippage),
         });
 

@@ -1,17 +1,21 @@
 type TAttendee = {
     username: string;
-    ticketQuantity: number;
+    numberOfTotalTickets: number;
 }
 
 export interface ITicket {
     event: string; // event name
-    quantity: number;
+    numberOfTotalTickets: number;
 } 
 
 export interface IOrder { 
     event: string;
     price: number;
-    quantity: number;
+    numberOfTotalTickets: number;
+}
+
+export type TTickets = {
+    [eventName: string]: number;
 }
 
 export interface IUser {
@@ -19,10 +23,7 @@ export interface IUser {
     password: string;
     balance: number;
 
-    buy?: IOrder[];
-    sell?: IOrder[];
-    tickets?: ITicket[];
-    unsubscribe?: () => void;
+    tickets?: TTickets;
 }
 
 export interface IEvent {
@@ -30,29 +31,21 @@ export interface IEvent {
     host: string;
     minPrice: number;
     maxPrice: number;
-    quantity: number;
+    numberOfTotalTickets: number;
     startingPrice: number;
     currentPrice: number;
     slippage: number;
-    closed: boolean
+    isClosed: boolean;
 
     attendees: TAttendee[];
 
-    available: number; // how much tickets available
-}
-
-export interface IBuyOrders {
-    buyers: Omit<IOrder, "event">;
-}
-
-export interface IBuyOrders {
-    sellers: Omit<IOrder, "event">;
+    numberOfAvailableTickets: number; // how much tickets available
 }
 
 export type ICreateEventInputs = {
     name: string,
     max: number,
     start: number,
-    quantity: number,
+    numberOfTotalTickets: number,
     slippage: number,
 }
