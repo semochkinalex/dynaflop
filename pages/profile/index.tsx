@@ -30,7 +30,7 @@ const Profile = () => {
     
     return (
         <main className={styles.main}>
-            {/* <Image className={styles.avatar} alt="Avatar" src="/avatar.png" width={150} height={150} />
+            <Image className={styles.avatar} alt="Avatar" src="/avatar.png" width={150} height={150} />
             <p className={styles.name}>{user?.username}</p>
             <p className={styles.balance}>Balance: ${user?.balance}</p>
             <div className={styles.row}>
@@ -39,7 +39,7 @@ const Profile = () => {
             </div>
             <ul className={styles.list}>
             { tickets }
-            </ul> */}
+            </ul>
         </main>
     );
 }
