@@ -39,6 +39,9 @@ const Event = () => {
         })
     }
 
+    console.log(userData)
+    console.log(eventData)
+
     useEffect(() => {
         setProgressBarWidth(((eventData?.currentPrice - eventData?.minPrice) / (eventData?.maxPrice - eventData?.minPrice)) * 100);
     }, [eventData]);
@@ -71,7 +74,7 @@ const Event = () => {
                         <div className={styles.buttons}>
                             <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.numberOfAvailableTickets == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
-                            <button disabled={userData && userData?.tickets && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+                            <button disabled={userData && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
                         </div>
                     :
                     // if the event is closed

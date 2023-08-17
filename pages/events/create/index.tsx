@@ -26,7 +26,8 @@ const Create = () => {
 
         const {name, max, start, numberOfTotalTickets, slippage} = inputs as ICreateEventInputs;
         
-        if (Number(start) > Number(max)) return setErrorMessage("Starting price can't be higher than the max");
+        if (Number(start) > Number(max)) return setErrorMessage("Starting price can't be higher than the max.");
+        if (Number(slippage) > Number(start)) return setErrorMessage("Slippage can't be higher than the starting price.");
         if (Number(start) <= 0 ||  Number(max) <= 0 || Number(numberOfTotalTickets) <= 0 || Number(slippage) <= 0) return setErrorMessage("The starting, maximum, slippage and the number of tickets must be above zero");
 
         isEventNameAvailable(name).then((isAvailable) => {
