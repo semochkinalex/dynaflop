@@ -12,36 +12,32 @@ import Header from '../components/header/header';
 function MyApp({ Component, pageProps }: AppProps) {
 
   const router = useRouter();
-  const { asPath } = useRouter();
 
   const state = useState<null | IUser>(null);
   const [user, setUser] = state;
 
-  // To save routing history (if someone enters a specific route he can return to it after authentication)
-  const ref = useRef<string>("/");
-
-  useEffect(() => {
-    ref.current = asPath;
-  }, [asPath]);
-
   useEffect(() => {
 
     const loadedUsername = localStorage.getItem("username"); 
+    const loadedEncryptedPassword = localStorage.getItem("hashedPassword"); 
 
-    if (loadedUsername) {
+    if (loadedUsername && loadedEncryptedPassword) {
       
-      subscribeUser(loadedUsername, (data) => {
-          setUser(data);
-          router.push(ref.current);
+      subscribeUser(loadedUsername, loadedEncryptedPassword, (userData) => {
+          setUser(userData);
       })
 
     }
   }, [])
 
   useEffect(() => {
-    localStorage.setItem("username", user?.username || '');
+    if (!user) {
+      router.push('/');
+    } else {
+      localStorage.setItem("username", user?.username || '');
+      localStorage.setItem("hashedPassword", user?.password || '');
+    }
 
-    router.push(user ? ref.current : '/');
   }, [user]);
 
   return (
@@ -52,4 +48,5 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp
+
+export default MyApp;

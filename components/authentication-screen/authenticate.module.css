@@ -1,9 +1,7 @@
 .container {
     display: flex;
     padding: 20px 30px;
-    /* background-color: #BAE8E8; */
     background-color: rgba(36,36,36,.07);
-    /* width: fit-content; */
     flex-direction: column;
     margin: auto;
     border-radius: 16px;
@@ -22,8 +20,9 @@
     display: flex;
     gap: 5px;
     width: 100%;
-    /* flex-direction: column; */
 }
+
+/* etc. */
 
 .input {
     /* margin-top: 5px; */

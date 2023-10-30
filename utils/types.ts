@@ -49,3 +49,4 @@ export type ICreateEventInputs = {
     numberOfTotalTickets: number,
     slippage: number,
 }
+

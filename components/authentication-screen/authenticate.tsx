@@ -1,10 +1,10 @@
 import { FC, useContext, useState } from 'react';
 import { authenticateUser, subscribeUser } from '../../utils/firebase';
 import styles from './authenticate.module.css';
-``
+
 import { UserContext } from '../../context/user-context';
 
-const Authenticate: FC = () => {
+const AuthenticationScreen: FC = () => {
 
     const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -23,8 +23,8 @@ const Authenticate: FC = () => {
         if (!loginRegexp.test(username) || username.length < 2) return setErrorMessage("Username must contain only letters and have at least 2 characters");
         
         authenticateUser(username, password)
-        .then(() => {
-            subscribeUser(username, (data) => {
+        .then((user) => {
+            subscribeUser(username, user.password, (data) => {
                 setUser(data);
             })
         })
@@ -46,9 +46,9 @@ const Authenticate: FC = () => {
             </fieldset>
             <p className={styles.error}>{errorMessage}</p>
             <button className={styles.submit} type="submit">Submit</button>
-            <p className={styles.disclamer}>We don't encrypt your passwords. Don't use your real one</p>
         </form>
     );
 }
 
-export default Authenticate;
+export default AuthenticationScreen;
+

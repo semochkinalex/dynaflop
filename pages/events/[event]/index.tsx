@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { UserContext } from '../../../context/user-context';
 import { buyTicket, togglePauseEvent, sellTicket, subscribeEvent } from '../../../utils/firebase';
 import styles from './event.module.css';
@@ -39,12 +39,41 @@ const Event = () => {
         })
     }
 
-    console.log(userData)
-    console.log(eventData)
-
     useEffect(() => {
         setProgressBarWidth(((eventData?.currentPrice - eventData?.minPrice) / (eventData?.maxPrice - eventData?.minPrice)) * 100);
     }, [eventData]);
+
+    const eventInterface = useMemo(() => {
+        return (
+            <>
+            {
+            userData?.username !== eventData?.host ? 
+            (
+                !eventData?.isClosed ?
+                // if event is open and the person is not the host
+                    <div className={styles.buttons}>
+                        <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.numberOfAvailableTickets == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+
+                        <button disabled={userData && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
+                    </div>
+                :
+                // if the event is closed
+                    <p className={styles.isClosed}>The event is closed</p>
+            )
+            :
+            // if it's the host
+            <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.isClosed)}>{eventData?.isClosed ? "Unpause this event" : "Pause this event"}</button>
+            }
+            {
+                // if user has tickets -> we display them
+                userData && userData?.tickets && eventData?.attendees[userData?.username] ?
+                <p className={styles.hint}>You have {eventData?.attendees[userData?.username]} ticket (s)</p>
+                :
+                ''
+            }
+            </>
+        )
+    }, [userData, eventData, togglePauseEvent, styles]);
 
     return (
         eventData ?
@@ -66,32 +95,7 @@ const Event = () => {
                 <p className={styles.tag}>Max. price</p>
             </div>
 
-            {
-                userData?.username !== eventData?.host ? 
-                (
-                    !eventData?.isClosed ?
-                    // if event is open and the person is not the host
-                        <div className={styles.buttons}>
-                            <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.numberOfAvailableTickets == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
-
-                            <button disabled={userData && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
-                        </div>
-                    :
-                    // if the event is closed
-                        <p className={styles.isClosed}>The event is closed</p>
-                )
-                :
-                // if it's the host
-                <button className={styles.archiveButton} onClick={() => togglePauseEvent(eventData.name, userData.username, !eventData.isClosed)}>{eventData?.isClosed ? "Unpause this event" : "Pause this event"}</button>
-            }
-
-            {
-                // if user has tickets -> we display them
-                userData && userData?.tickets && eventData?.attendees[userData?.username] ?
-                <p className={styles.hint}>You have {eventData?.attendees[userData?.username]} ticket (s)</p>
-                :
-                ''
-            }
+            {eventInterface}
 
         </main>
         :

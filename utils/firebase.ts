@@ -22,27 +22,33 @@ const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 
 // Recieve updates on any user's profile changes (balance & tickets)
-export const subscribeUser = async (username: string, callback: (user: any) => void) => {
+export const subscribeUser = async (username: string, hasdhedPassword: string, callback: (user: any) => void) => {
 
     try {
+
         const unsub = onSnapshot(doc(firestore, "users", username), (user) => {
-            callback(user.data());
+            if (user.data().password === hasdhedPassword) {
+                callback(user.data());
+            } else {
+                return Promise.reject("Wrong password given.")
+            }
         });
         return Promise.resolve(unsub);
-    } catch (err) {
-        return Promise.reject(err);
+    } catch (error) {
+        return Promise.reject(error);
     }
 }
 
 // Recieve updates on the event's changes.
 export const subscribeEvent = async (event: string, callback: (fetchedEvent: any) => void) => {
     try {
+
         const unsub = onSnapshot(doc(firestore, "events", event), (fetchedEvent) => {
             callback(fetchedEvent.data());
         });
         return Promise.resolve(unsub);
-    } catch (err) {
-        return Promise.reject(err);
+    } catch (error) {
+        return Promise.reject(error);
     }
 
 }
@@ -60,37 +66,41 @@ export const isEventNameAvailable =async (eventName:string) => {
 
 // If there is an existing account -> login into it. If there is no account -> create it
 export const authenticateUser = async (username: string, password: string) => {
-
-    const passwordRegexp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
-    
-    if (!passwordRegexp.test(password)) {
-        return Promise.reject("Your password must include minimum eight characters, at least one letter and one number")
-    }
-
-    const userRef = doc(firestore, "users", username);
-    const userSnap = await getDoc(userRef);
-    
-    // If an account doesn't exist, we create it.
-    if (!userSnap.exists()) {
+    try {
+        const passwordRegexp = new RegExp(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
         
-        const encryptedPassword = passwordHash.generate(password);
-        const userData: IUser = { username, password: encryptedPassword, balance: 0 }
- 
-        try {
-            await setDoc(doc(firestore, "users", username), userData);
-            return Promise.resolve(userData);
-        } catch (error) {
-            return Promise.reject(error);
+        if (!passwordRegexp.test(password)) {
+            return Promise.reject("Your password must include minimum eight characters, at least one letter and one number")
         }
     
-    // if it does exist -> we check the password
-    } else {
-        if (passwordHash.verify(password, userSnap.data().password)) {
-            return Promise.resolve(userSnap.data());
+        const userRef = doc(firestore, "users", username);
+        const userSnap = await getDoc(userRef);
+        
+        // If an account doesn't exist, we create it.
+        if (!userSnap.exists()) {
+            
+            const encryptedPassword = passwordHash.generate(password);
+            const userData: IUser = { username, password: encryptedPassword, balance: 0 }
+     
+            try {
+                await setDoc(doc(firestore, "users", username), userData);
+                return Promise.resolve(userData);
+            } catch (error) {
+                return Promise.reject(error);
+            }
+        
+        // if it does exist -> we check the password
         } else {
-            return Promise.reject("Incorrect Password");
+            if (passwordHash.verify(password, userSnap.data().password)) {
+                return Promise.resolve(userSnap.data());
+            } else {
+                return Promise.reject("Incorrect Password");
+            }
         }
+    } catch (error) {
+        return Promise.reject(error);
     }
+
 };
 
 export const changeBalance = async (username: string, amount: number) => {
@@ -152,35 +162,68 @@ const calculateTicketPrice = (price: number, min: number, max: number, slippage:
     }
 }
 
-export const buyTicket = async (eventName: string, userData: IUser) => {
+const fetchHostData = async (host: string): Promise<IUser> => {
     try {
-        // Get all information about the event
+        const hostRef = doc(firestore, "users", host);
+        const hostSnap = await getDoc(hostRef);
+        const hostData = hostSnap.data() as IUser;
+        return Promise.resolve(hostData);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+const fetchEventData = async (eventName: string): Promise<IEvent>=> {
+    try {
         const eventRef = doc(firestore, "events", eventName);
         const eventSnap = await getDoc(eventRef);
-        const eventData = eventSnap.data();
+        const eventData = eventSnap.data() as IEvent;
+        return Promise.resolve(eventData);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
 
-        // Get all information about the host
-        const hostRef = doc(firestore, "users", eventData?.host);
-        const hostSnap = await getDoc(hostRef);
-        const hostData = hostSnap.data();
-        
+const checkForBasicErrorsInEventOperations = async (userData: IUser, eventData: IEvent, hostData: IUser) => {
+    try {
         if (!userData) return Promise.reject("Invalid user account");
         if (!eventData) return Promise.reject("Failed to fetch event");
         if (!hostData) return Promise.reject("Invalid host.");
+    } catch (error) {
+        return Promise.reject(error);
+    }
+}
+
+const updateEventData =async ({eventData: IEvent, userData: IUser, updatedAttendees}) => {
+    
+}
+
+
+export const buyTicket = async (eventName: string, userData: IUser) => {
+    try {
+        // Get all information about the event
+        const eventData = await fetchEventData(eventName);
+
+        // Get all information about the host
+        const hostData = await fetchHostData(eventData?.host);
+        
+        checkForBasicErrorsInEventOperations(userData, eventData, hostData);
         
         if (eventData?.numberOfAvailableTickets <= 0) return Promise.reject("No more tickets available");
         if (userData?.balance < eventData.currentPrice) return Promise.reject("Insufficient account balance");
         
+        // the price for which the person buys
         const buyPrice = eventData.currentPrice;
 
-        const {currentPrice, minPrice, maxPrice, slippage} = eventData;
-        const newPrice = calculateTicketPrice(currentPrice, minPrice, maxPrice, slippage, true);
+        const {currentPrice, minPrice, maxPrice, slippage} = eventData; // destructurizing 
 
-        // checks whether the user never bought any tickets or has bought them and sold (therefore equals 0)
-        const ticketCount = (eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0) ? eventData['attendees'][userData.username] + 1 : 1;
+        const newPrice = calculateTicketPrice(currentPrice, minPrice, maxPrice, slippage, true); // the price after the transaction
+
+        // checks whether the user never bought any tickets or has bought them and sold (therefore equals 0). Has an 'if' statement because if the user never initiated buying the tickets the 'attendees' field with the user's name is null
+        const userTicketCount = (eventData['attendees'][userData.username] || eventData['attendees'][userData.username] === 0) ? eventData['attendees'][userData.username] + 1 : 1;
         
         // Update event's data
-        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: ticketCount}});
+        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets - 1, currentPrice: newPrice, attendees: {...eventData.attendees, [userData.username]: userTicketCount}});
         
         // Pay the host
         await setDoc(doc(firestore, "users", hostData.username), {
@@ -194,7 +237,7 @@ export const buyTicket = async (eventName: string, userData: IUser) => {
             balance: userData.balance - buyPrice,
             tickets: {
                 ...userData.tickets,
-                [eventName]: ticketCount,
+                [eventName]: userTicketCount,
             }
         });
 
@@ -206,42 +249,38 @@ export const buyTicket = async (eventName: string, userData: IUser) => {
 
 export const sellTicket = async (eventName: string, userData: IUser) => {
     try {
+        // Get all information about the event
+        const eventData = await fetchEventData(eventName);
 
-        const eventRef = doc(firestore, "events", eventName);
-        const eventSnap = await getDoc(eventRef);
-        const eventData = eventSnap.data();
+        // Get all information about the host
+        const hostData = await fetchHostData(eventData?.host);
 
-        const hostRef = doc(firestore, "users", eventData?.host);
-        const hostSnap = await getDoc(hostRef);
-        const hostData = hostSnap.data();
-
-        if (!userData) return Promise.reject("Invalid user account");
-        if (!eventData) return Promise.reject("Failed to fetch event data");
-        if (!hostData) return Promise.reject("Invalid host."); 
+        checkForBasicErrorsInEventOperations(userData, eventData, hostData);
 
         if (!(userData.username in eventData.attendees) || eventData.attendees[userData.username] <= 0) return Promise.reject("User has no available tickets to sell");
-        if (!userData?.tickets) return Promise.reject("User account format isn't supported. Probably was changed manually through firebase");
         
-        let updatedAttendees;
-
+        
+        // For the event: get the updated attendees by either removing him from the tickets object or by subtracting his tickets by one.
+        let updatedEventAttendees;
         if (eventData['attendees'][userData.username] - 1 === 0) {
             let {[userData.username]: deletedAttendee, ...leftAttendees} = eventData?.attendees;
-            updatedAttendees = leftAttendees; // javascript trick to get the rest of attendees.
+            updatedEventAttendees = leftAttendees; // javascript trick to get the rest of attendees.
         } else {
-            updatedAttendees = {
+            updatedEventAttendees = {
                 ...eventData?.attendees,
                 [userData.username]: eventData?.attendees[userData.username] - 1,
             };
         }
         
-        // updated price after selling
-        const {currentPrice, minPrice, maxPrice, slippage} = eventData;
-        const newPrice = calculateTicketPrice(currentPrice, minPrice, maxPrice, slippage, false);
+        // Calculate the new price after selling
+        const {currentPrice, minPrice, maxPrice, slippage} = eventData; // destructurizing
 
-        // change the event
-        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets + 1, currentPrice: newPrice, attendees: updatedAttendees});
+        const newPrice = calculateTicketPrice(currentPrice, minPrice, maxPrice, slippage, false); // the price after the transaction
+
+        // Change the event data with the attendees, the price and available tickets
+        await setDoc(doc(firestore, "events", eventName), {...eventData, numberOfAvailableTickets: eventData?.numberOfAvailableTickets + 1, currentPrice: newPrice, attendees: updatedEventAttendees});
         
-        // track the user's tickets
+        // Manage the buyer's tickets
         let updatedUserTickets;
 
         if (userData?.tickets[eventName] - 1) {
@@ -255,13 +294,13 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
             updatedUserTickets = leftUserTickets;
         }
 
-        // subtract money from host
+        // Subtract money from host
         await setDoc(doc(firestore, "users", hostData.username), {
             ...hostData,
             balance: hostData?.balance - newPrice,
         })
 
-        // change the buyer's profile using updatedUserTickets
+        // Add tickets to the buyer's profile and decrease balance 
         await setDoc(doc(firestore, "users", userData.username), {
             ...userData,
             balance: userData.balance + newPrice,
@@ -275,7 +314,7 @@ export const sellTicket = async (eventName: string, userData: IUser) => {
     }
 }
 
-export const createEvent = async (name: any, host: any, start: any, max: any, numberOfTotalTickets: any, slippage: any) => {
+export const createEvent = async (name: string, host: string, start: number, max: number, numberOfTotalTickets: number, slippage: number) => {
     try {
         await setDoc(doc(firestore, "events", name), {
             name,
@@ -292,7 +331,8 @@ export const createEvent = async (name: any, host: any, start: any, max: any, nu
         });
 
         return Promise.resolve();
-    } catch (err) {
-        return Promise.reject(err);
+    } catch (error) {
+        return Promise.reject(error);
     }
 }
+

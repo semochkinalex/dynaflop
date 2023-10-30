@@ -28,6 +28,7 @@ const Events = () => {
             getEvents();
         }, 5000);
 
+        // clear interval and make sure no unnecessary updates happen
         return () => clearInterval(interval);
     }, [])
 
@@ -40,9 +41,9 @@ const Events = () => {
                 <Link href="/events/create"><button className={styles.create}>Create Event</button></Link>
                 </div>
                 {
-                    events.filter((el) => !el?.isClosed).map((el, i) => {
+                    events.filter((event) => !event?.isClosed).map((event, i) => {
                         return (
-                            <Event key={i} {...el} />
+                            <Event key={i} {...event} />
                         )
                     })
                 }
@@ -58,3 +59,4 @@ const Events = () => {
 }
 
 export default Events;
+

@@ -11,6 +11,7 @@ const Header = () => {
     const logout = () => {
       setUser(null);
       localStorage.removeItem("username");
+      localStorage.removeItem("hashedPassword");
     }
 
     const add = () => {
@@ -41,3 +42,4 @@ const Header = () => {
 }
 
 export default Header;
+
