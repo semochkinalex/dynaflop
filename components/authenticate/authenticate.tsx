@@ -4,7 +4,7 @@ import styles from './authenticate.module.css';
 
 import { UserContext } from '../../context/user-context';
 
-const AuthenticationScreen: FC = () => {
+const Authenticate: FC = () => {
 
     const [errorMessage, setErrorMessage] = useState<string>('');
 
@@ -20,7 +20,7 @@ const AuthenticationScreen: FC = () => {
         e.preventDefault();
         console.log(username.length, username.length >= 2)
         if (!username || !password) return setErrorMessage("You must complete both fields");
-        if (!loginRegexp.test(username) || username.length < 2) return setErrorMessage("Username must contain only letters and have at least 2 characters");
+        if (!loginRegexp.test(username) || username.length < 2 || username.length > 50) return setErrorMessage("Username must contain only letters and have between 2-50 characters");
         
         authenticateUser(username, password)
         .then((user) => {
@@ -30,6 +30,7 @@ const AuthenticationScreen: FC = () => {
         })
         .catch((err) => {
             setErrorMessage(err);
+            console.log(err);
         })
     }
 
@@ -50,5 +51,5 @@ const AuthenticationScreen: FC = () => {
     );
 }
 
-export default AuthenticationScreen;
+export default Authenticate;
 

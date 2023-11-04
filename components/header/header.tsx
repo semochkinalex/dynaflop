@@ -32,9 +32,9 @@ const Header = () => {
             </div>
           </Link>
           <Link href="/profile">
-            <p className={styles.username}>{user?.username} - <span className={styles.balance}>${user?.balance}</span></p>
+            <p className={styles.username}>{user?.username} | <span className={styles.balance}>DEMO Balance - ${user?.balance}</span></p>
           </Link>
-            <button className={styles.button} onClick={add}>Add Balance</button>
+            <button className={styles.button} onClick={add}>Add $1000</button>
         </div>
         <Image className={styles.logout} alt="Logout" src="/exit.png" onClick={logout} width={30} height={30} />
       </header>

@@ -16,6 +16,14 @@ const Event = () => {
 
     const [progressBarWidth, setProgressBarWidth] = useState(0);
 
+    const hasEnoughBalance = useMemo(() => {
+        return userData?.balance > eventData?.currentPrice;
+    }, [userData, eventData]);
+    
+    const eventHasAvailableTickets = useMemo(() => {
+        return eventData?.numberOfAvailableTickets > 0
+    }, [eventData]);
+
     useEffect(() => {
         if (!event || typeof event != 'string') return; // typescript error-handling
         subscribeEvent(event, setEventData);
@@ -52,7 +60,7 @@ const Event = () => {
                 !eventData?.isClosed ?
                 // if event is open and the person is not the host
                     <div className={styles.buttons}>
-                        <button disabled={(userData?.balance < eventData?.currentPrice) || eventData?.numberOfAvailableTickets == 0 || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
+                        <button disabled={(!hasEnoughBalance) || !eventHasAvailableTickets || !userData} className={`${styles.buy} ${styles.button}`} type="submit" onClick={buy}>Buy ticket for {eventData?.currentPrice}</button>
 
                         <button disabled={userData && !eventData?.attendees[userData?.username] || !userData} className={`${styles.sell} ${styles.button}`} type="submit" onClick={sell}>Sell ticket for {eventData?.currentPrice - eventData?.slippage}</button>
                     </div>
@@ -69,8 +77,10 @@ const Event = () => {
                 userData && userData?.tickets && eventData?.attendees[userData?.username] ?
                 <p className={styles.hint}>You have {eventData?.attendees[userData?.username]} ticket (s)</p>
                 :
-                ''
+                <p className={styles.hint}>You don't have tickets to sell</p>
             }
+            {!hasEnoughBalance && <p className={styles.hint}>Not enough balance</p>}
+            {!eventHasAvailableTickets && <p className={styles.hint}>No availabe tickets on sale</p>}
             </>
         )
     }, [userData, eventData, togglePauseEvent, styles]);
