@@ -194,10 +194,6 @@ const checkForBasicErrorsInEventOperations = async (userData: IUser, eventData: 
     }
 }
 
-const updateEventData =async ({eventData: IEvent, userData: IUser, updatedAttendees}) => {
-    
-}
-
 
 export const buyTicket = async (eventName: string, userData: IUser) => {
     try {
